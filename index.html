@@ -2785,7 +2785,10 @@ function syncFavChip(){
   if(b){
     b.hidden=false;
     b.querySelector('small').textContent=FAV.size;
-    if(FAV.size===0 && F.fav){ F.fav=false; b.setAttribute('aria-pressed','false'); }
+    /* 예전엔 담아둔 거래처가 0곳이 되면 필터를 자동으로 꺼버렸는데, 그러면 "내 거래처"를
+       처음 눌러본 사용자에게는 필터가 적용도 안 된 채 전체 목록이 그대로 보여서
+       "★ 버튼이 안 먹힌다"고 오해하게 됐다. 0건이어도 필터는 그대로 유지해 목록 쪽의
+       "조건에 맞는 거래처가 없습니다" 안내가 정직하게 뜨도록 한다. */
   }
   /* 상단바 바로가기 — 어느 탭에 있든 담아둔 거래처로 바로 갈 수 있게. 토글 버튼이므로
      지금 필터가 켜져 있는지(aria-pressed)도 같이 표시한다. */
@@ -3171,6 +3174,12 @@ function openClient(id){
         '<dt>첫 거래</dt><dd class="num">'+(c.f||'—')+'</dd>'+
         '<dt>거래 연도</dt><dd class="num">'+(c.ay.length?c.ay.join(', '):'—')+'</dd>'+
       '</dl></div>'+
+    '<div class="card" id="clientInsightCard"><h3>이 거래처 리뷰 인사이트</h3>'+
+      '<p class="sub">이 거래처에 남겨진 리뷰만 근거로 자동 요약합니다</p>'+
+      '<div id="clientInsightBody"><p class="formhint">불러오는 중…</p></div>'+
+      '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<button class="btn-ghost" id="clientInsightBtn" type="button">🔄 다시 생성</button>'+
+        '<span class="formhint" id="clientInsightMsg"></span></div></div>'+
     '<div class="card" id="opCard"><h3>이 거래처에 대한 의견</h3>'+
       '<p class="sub">담당자가 알아야 할 <b>협업 경험</b>을 남겨주세요 — 의사결정 속도, 요구 수준, 정산 처리, 담당자 교체 등.</p>'+
       '<div id="opBox"></div></div>'+
@@ -3192,6 +3201,27 @@ function openClient(id){
   dr.querySelector('.dbody').scrollTop=0;
   mountOpinions(c);
   renderG2B();
+  renderClientInsight(c);
+  const ciBtn=$('#clientInsightBtn');
+  if(ciBtn) ciBtn.addEventListener('click', async ()=>{
+    const msg=$('#clientInsightMsg');
+    ciBtn.disabled=true; if(msg) msg.textContent='생성 중… (몇 초 걸릴 수 있어요)';
+    try{
+      const r=await fetch(SUPABASE_FN_URL,{method:'POST',headers:sbHeaders(),body:JSON.stringify({company_name:c.n})});
+      const raw=await r.text();
+      let j={}; try{ j=JSON.parse(raw); }catch(_){ }
+      if(!r.ok) throw new Error('HTTP '+r.status+' '+(j.error||raw.slice(0,300)));
+      if(j.error) throw new Error(j.error);
+      if(msg){
+        if(j.skipped==='no_reviews') msg.textContent='아직 리뷰가 없습니다.';
+        else if(j.skipped==='unchanged') msg.textContent='새로 등록된 리뷰가 없어 다시 생성하지 않았습니다.';
+        else msg.textContent='새로 생성했습니다.';
+      }
+      await renderClientInsight(c);
+    }catch(e){
+      if(msg) msg.textContent='생성 실패: '+(e&&e.message||String(e));
+    }finally{ ciBtn.disabled=false; }
+  });
   syncToTop();
 }
 let dSelYear=-1, dHistShown=30, dHistView=[];
@@ -3825,6 +3855,33 @@ function markMine(kind,id){ if(!id) return; const m=mine(); m[kind]=[id].concat(
 function unmarkMine(kind,id){ const m=mine(); m[kind]=m[kind].filter(x=>x!==id);
   try{ localStorage.setItem(MINEKEY, JSON.stringify(m)); }catch(e){} }
 function isMine(kind,id){ return mine()[kind].indexOf(id)>=0; }
+/* 내가 등록한 문의에 답변이 달렸는지 — 이 브라우저 기준으로 "이미 봤음"을 기억해 배지를 띄운다 */
+const SEENREPLYKEY='kma-insight-seenReplies';
+function seenReplies(){ try{ return new Set(JSON.parse(localStorage.getItem(SEENREPLYKEY)||'[]')); }catch(e){ return new Set(); } }
+function markReplySeen(id){
+  const s=seenReplies(); s.add(id);
+  try{ localStorage.setItem(SEENREPLYKEY, JSON.stringify(Array.from(s).slice(-1000))); }catch(e){}
+}
+function unseenReplyCount(){
+  const seen=seenReplies();
+  return ASKALL.filter(a=>a.reply && isMine('ask', a._id) && !seen.has(a._id)).length;
+}
+function renderAskBadge(){
+  const btn=$('#btnAsk'); if(!btn) return;
+  const n=unseenReplyCount();
+  let b=btn.querySelector('#askBadgeDot');
+  if(n>0){
+    if(!b){
+      b=document.createElement('span'); b.id='askBadgeDot';
+      b.style.cssText='display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;'+
+        'padding:0 4px;margin-left:6px;border-radius:8px;background:#e5484d;color:#fff;font-size:11px;'+
+        'font-weight:700;line-height:1;vertical-align:middle';
+      btn.appendChild(b);
+    }
+    b.textContent=String(n>99?'99+':n);
+    b.title=n+'건의 문의에 새 답변이 달렸습니다';
+  } else if(b){ b.remove(); }
+}
 function who(){ try{ return JSON.parse(localStorage.getItem(WHOKEY)||'{}'); }catch(e){ return {}; } }
 function saveWho(o){ try{ localStorage.setItem(WHOKEY, JSON.stringify(o)); }catch(e){} }
 function fmtTs(ts){
@@ -3857,6 +3914,26 @@ async function sbInsert(table,row){
   if(!r.ok){ const t=await r.text().catch(()=>''); throw new Error('HTTP '+r.status+' '+t.slice(0,300)); }
   return r.json();
 }
+async function sbUpdate(table,id,patch){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+table+'?id=eq.'+id, {method:'PATCH', headers:sbHeaders({Prefer:'return=representation'}), body:JSON.stringify(patch)});
+  if(!r.ok){ const t=await r.text().catch(()=>''); throw new Error('HTTP '+r.status+' '+t.slice(0,300)); }
+  return r.json();
+}
+async function sbDelete(table,id){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+table+'?id=eq.'+id, {method:'DELETE', headers:sbHeaders()});
+  if(!r.ok){ const t=await r.text().catch(()=>''); throw new Error('HTTP '+r.status+' '+t.slice(0,300)); }
+  return true;
+}
+async function loadInquiries(){
+  try{
+    const rows=await sbSelect('inquiries?select=*&order=created_at.desc&limit=500');
+    ASKALL=rows.map(function(r){ return Object.assign({_id:r.id}, r); });
+  }catch(e){ ASKALL=[]; }
+  DBREADY=true; DB=true;
+  renderAskInbox();
+  renderOpBox();
+  renderAskBadge();
+}
 let REVIEWS=[], REVIEWSREADY=false;
 async function refreshReviewCounts(){
   try{
@@ -3875,16 +3952,44 @@ async function loadCompanyReviews(name){
 function initReviews(){ refreshReviewCounts(); }
 
 /* ---------- 리뷰 기반 AI 인사이트 (요약 인사이트 탭) ---------- */
+function formatInsightHtml(text){
+  var lines=(text||'').split(/\n+/).map(function(l){return l.trim();}).filter(Boolean);
+  if(!lines.length) return '';
+  var head=lines[0];
+  var bullets=lines.slice(1).map(function(l){return l.replace(/^[-•]\s*/,'');}).filter(Boolean);
+  var html='<p style="font-weight:600;font-size:15px;margin:0 0 10px;line-height:1.5">'+esc(head)+'</p>';
+  if(bullets.length){
+    html+='<ul style="margin:0;padding-left:20px;line-height:1.8">'+
+      bullets.map(function(b){return '<li>'+esc(b)+'</li>';}).join('')+
+      '</ul>';
+  }
+  return html;
+}
 async function renderAiInsight(){
   const body=$('#aiInsightBody'); if(!body) return;
   try{
     const rows=await sbSelect('insights?company_name=eq.__ALL__&select=insight_text,review_count,updated_at&limit=1');
     const row=rows&&rows[0];
     if(row&&row.insight_text){
-      body.innerHTML='<p>'+esc(row.insight_text).replace(/\n/g,'<br>')+'</p>'+
-        '<p class="formhint">리뷰 '+cnt(row.review_count||0)+'건 기준 · '+esc(fmtTs(row.updated_at))+' 생성</p>';
+      body.innerHTML=formatInsightHtml(row.insight_text)+
+        '<p class="formhint" style="margin-top:10px">리뷰 '+cnt(row.review_count||0)+'건 기준 · '+esc(fmtTs(row.updated_at))+' 생성</p>';
     } else {
       body.innerHTML='<p class="formhint">아직 생성된 인사이트가 없습니다. 리뷰가 쌓인 뒤 아래 "다시 생성"을 눌러보세요.</p>';
+    }
+  }catch(e){
+    body.innerHTML='<p class="formhint">인사이트를 불러오지 못했습니다 — <b>'+esc(e&&e.message||String(e))+'</b></p>';
+  }
+}
+async function renderClientInsight(c){
+  const body=$('#clientInsightBody'); if(!body) return;
+  try{
+    const rows=await sbSelect('insights?company_name=eq.'+encodeURIComponent(c.n)+'&select=insight_text,review_count,updated_at&limit=1');
+    const row=rows&&rows[0];
+    if(row&&row.insight_text){
+      body.innerHTML=formatInsightHtml(row.insight_text)+
+        '<p class="formhint" style="margin-top:10px">리뷰 '+cnt(row.review_count||0)+'건 기준 · '+esc(fmtTs(row.updated_at))+' 생성</p>';
+    } else {
+      body.innerHTML='<p class="formhint">이 거래처에 대한 인사이트가 아직 없습니다. 리뷰가 등록된 뒤 위 "다시 생성"을 눌러보세요.</p>';
     }
   }catch(e){
     body.innerHTML='<p class="formhint">인사이트를 불러오지 못했습니다 — <b>'+esc(e&&e.message||String(e))+'</b></p>';
@@ -3915,35 +4020,24 @@ function initAiInsight(){
 }
 
 function initDB(){
-  if(!(window.claude && typeof window.claude.use==='function')){ DBREADY=true; renderOpBox(); return; }
-  window.claude.use('db').then(db=>{
-    DBREADY=true; DB=db;
-    if(!db){ renderOpBox(); return; }
-    try{
-      db.collection('inquiries').limit(500).onSnapshot(snap=>{
-        ASKALL=snap.docs.map(d=>Object.assign({_id:d.id}, d.data()))
-          .sort((a,b)=>(b.ts||0)-(a.ts||0));
-        renderAskInbox();
-      }, e=>{});
-    }catch(e){ DB=null; renderOpBox(); }
-    /* 나라장터 입찰공고 — 하루 1회 예약 작업이 채워 넣는 저장소를 읽기만 한다.
-       이 페이지 자체는 나라장터로 어떤 요청도 보내지 않는다(게시된 페이지는 외부 API 호출이 막혀 있음).
-       별도 try로 감싸 — 이 구독이 실패해도 의견·문의 기능은 영향받지 않는다. */
-    try{
-      /* db 컬렉션 한 번에 읽어올 수 있는 상한은 1000건 — 2000으로 걸어뒀던 게 조용히
-         invalid_argument로 실패해(에러 콜백이 비어 있어 화면엔 아무 신호도 없었다) 나라장터
-         카드 자체가 절대 안 뜨는 원인이었다. 1000으로 낮추고, 마감일 내림차순으로 정렬해
-         "진행 중 + 최근 마감" 건이 앞쪽 1000건 안에 남도록 한다(아주 오래전에 마감된 일부만 제외됨). */
-      db.collection('g2bNotices').orderBy('closeDt','desc').limit(1000).onSnapshot(snap=>{
-        G2BALL=snap.docs.map(d=>Object.assign({_id:d.id}, d.data()));
-        G2BCOUNT={};
-        G2BALL.forEach(g=>{ if(g.cid && ddayLabel(g.closeDt)) G2BCOUNT[g.cid]=(G2BCOUNT[g.cid]||0)+1; });
-        renderG2B();
-        if($('#g2bFavModal') && $('#g2bFavModal').classList.contains('on')) renderG2bFavModal();
-        if(typeof drawClients==='function') drawClients(false);
-      }, e=>{ try{ console.warn('[g2b] subscribe failed', e); }catch(_){} });
-    }catch(e){}
-  }).catch(()=>{ DBREADY=true; renderOpBox(); });
+  loadInquiries();
+  loadG2bNotices();
+}
+/* 나라장터 입찰공고 — Supabase g2b_notices 테이블(예약 작업이 하루 1회 채워 넣는 저장소)을
+   읽기만 한다. 이 페이지 자체는 나라장터로 어떤 요청도 보내지 않는다.
+   과거엔 claude.ai Artifact 내장 db(window.claude.use('db'))를 썼으나, 대시보드가
+   GitHub Pages로 옮겨오며 그 API를 쓸 수 없어(artifact 전용) Supabase REST 조회로 바꿨다.
+   별도 try로 감싸 — 이 조회가 실패해도 의견·문의 기능은 영향받지 않는다. */
+async function loadG2bNotices(){
+  try{
+    const rows=await sbSelect('g2b_notices?select=id,cid,cn,title,category,budget,close_dt,url&order=close_dt.desc&limit=1000');
+    G2BALL=rows.map(r=>({_id:r.id, cid:r.cid, cn:r.cn, title:r.title, category:r.category, budget:r.budget, closeDt:r.close_dt, url:r.url}));
+    G2BCOUNT={};
+    G2BALL.forEach(g=>{ if(g.cid && ddayLabel(g.closeDt)) G2BCOUNT[g.cid]=(G2BCOUNT[g.cid]||0)+1; });
+    renderG2B();
+    if($('#g2bFavModal') && $('#g2bFavModal').classList.contains('on')) renderG2bFavModal();
+    if(typeof drawClients==='function') drawClients(false);
+  }catch(e){ try{ console.warn('[g2b] load failed', e); }catch(_){} }
 }
 async function mountOpinions(c){
   opFlash=''; opFormOpen=false;
@@ -3989,6 +4083,8 @@ function renderOpBox(){
   opTagState=new Set();
   box.innerHTML=
     '<div class="op-form" id="opForm">'+
+      '<input type="text" id="opHp" name="website" value="" autocomplete="off" tabindex="-1" '+
+        'style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true">'+
       '<div class="op-2">'+
         '<input class="inp" id="opSabun" placeholder="사번" maxlength="20" value="'+esc(w.sabun||'')+'">'+
         '<input class="inp" id="opName" placeholder="이름" maxlength="20" value="'+esc(w.name||'')+'">'+
@@ -4032,9 +4128,17 @@ function renderOpBox(){
     const isAnon=anon.checked;
     const sabun=$('#opSabun').value.trim(), name=nameI.value.trim(), dept=deptI.value.trim(), text=$('#opText').value.trim();
     const msg=$('#opMsg');
+    const hp=$('#opHp');
+    if(hp && hp.value.trim()){ return; } /* 숨은 필드가 채워져 있으면 자동입력 봇으로 보고 조용히 무시 */
     if(!sabun){ msg.innerHTML='<b style="color:var(--danger)">사번을 입력해 주세요.</b>'; return; }
     if(!isAnon && !name){ msg.innerHTML='<b style="color:var(--danger)">이름을 적거나 익명으로 올리기를 선택해 주세요.</b>'; return; }
     if(!text && !opTagState.size){ msg.innerHTML='<b style="color:var(--danger)">내용이나 태그 중 하나는 남겨주세요.</b>'; return; }
+    if(text && text.length<10){ msg.innerHTML='<b style="color:var(--danger)">내용을 조금 더 자세히 적어주세요(10자 이상). "테스트" 같은 확인용 문구만 남기면 다른 분들이 참고하기 어렵습니다.</b>'; return; }
+    if(text && REVIEWS[0] && REVIEWS[0].author_id===sabun && REVIEWS[0].content===text){
+      msg.innerHTML='<b style="color:var(--danger)">방금 같은 내용을 이미 등록하셨습니다.</b>'; return;
+    }
+    const lastAt=Number(localStorage.getItem('kma_lastReviewAt_'+sabun)||0);
+    if(Date.now()-lastAt < 8000){ msg.innerHTML='<b style="color:var(--danger)">너무 빠르게 다시 등록하고 있어요. 몇 초 뒤 다시 시도해 주세요.</b>'; return; }
     saveWho({sabun:sabun, name:isAnon?(who().name||''):name, dept:isAnon?(who().dept||''):dept});
     const btn=$('#opSave'); btn.disabled=true; msg.textContent='등록 중…';
     try{
@@ -4043,6 +4147,7 @@ function renderOpBox(){
         author_name:isAnon?'':name, dept:isAnon?'':dept, tags:Array.from(opTagState),
         content:text
       });
+      try{ localStorage.setItem('kma_lastReviewAt_'+sabun, String(Date.now())); }catch(_){}
       opFlash='<b style="color:var(--good-fg)">'+(isAnon?'익명으로 등록했습니다.':'등록했습니다.')+'</b>';
       opFormOpen=false;
       await loadCompanyReviews(c.n);
@@ -4057,7 +4162,7 @@ function renderOpBox(){
 
 /* ---------- 나라장터 진행 중인 공고 ----------
    나라장터 API는 발주기관명만 알려주고 우리 쪽 거래처 코드는 모른다. 그래서 예약 작업이
-   하루 1회, 발주기관명을 거래처명과 "정확히 일치하는 것만" 맞춰서 g2bNotices 컬렉션에 넣어 둔다
+   하루 1회, 발주기관명을 거래처명과 "정확히 일치하는 것만" 맞춰서 Supabase g2b_notices 테이블에 넣어 둔다
    (표기가 비슷하기만 한 것은 오매칭 위험이 있어 자동 연결하지 않는다). 이 화면은 그 결과를
    cid 기준으로 걸러서 마감이 지나지 않은 것만 보여줄 뿐, 나라장터로 직접 요청하지 않는다. */
 function ddayLabel(closeDt){
@@ -4305,15 +4410,19 @@ function renderAskInbox(){
       '<button class="linkbtn" id="askBoxTgl">'+(askBoxOpen?'접기':'목록 보기')+'</button>'+
       (askBoxOpen?'<button class="linkbtn" id="askBoxCopy">엑셀로 다운로드</button>':'')+'</div>'+
     (askBoxOpen ? '<div class="asklist">'+ASKALL.slice(0,200).map(a=>askItemHTML(a)).join('')+'</div>' : '');
+  if(askBoxOpen){
+    ASKALL.forEach(a=>{ if(a.reply && isMine('ask',a._id)) markReplySeen(a._id); });
+    renderAskBadge();
+  }
   const t=$('#askBoxTgl');
   if(t) t.addEventListener('click',()=>{ askBoxOpen=!askBoxOpen; renderAskInbox(); });
   const c=$('#askBoxCopy');
   if(c) c.addEventListener('click',()=>{
     const use=ASKALL.slice(0,200);
     exportRows(['등록 시각','상태','유형','이름','부서','회신 이메일','문의 내용','답변','답변자','답변 시각'],
-      use.map(a=>[fmtTs(a.ts), ST[askStatus(a)][0], a.kind||'', a.author||'', a.dept||'', a.email||'',
-        String(a.text||'').replace(/\s+/g,' '), String(a.reply||'').replace(/\s+/g,' '),
-        a.replyBy||'', a.replyTs?fmtTs(a.replyTs):'']),
+      use.map(a=>[fmtTs(a.created_at), ST[askStatus(a)][0], a.kind||'', a.author||'', a.dept||'', a.email||'',
+        String(a.content||'').replace(/\s+/g,' '), String(a.reply||'').replace(/\s+/g,' '),
+        a.reply_by||'', a.reply_ts?fmtTs(a.reply_ts):'']),
       {total:ASKALL.length, rows:use.length, unit:'건'}, '문의와_답변');
   });
   if(askBoxOpen) bindAskItems(box);
@@ -4321,19 +4430,21 @@ function renderAskInbox(){
 
 function askItemHTML(a){
   const st=askStatus(a), s=ST[st];
+  const isNew=a.reply && isMine('ask',a._id) && !seenReplies().has(a._id);
   return '<div class="askitem" data-id="'+esc(a._id)+'">'+
     '<div class="op-h">'+
       '<span class="ask-st '+s[1]+'">'+s[0]+'</span>'+
+      (isNew?'<span style="background:#e5484d;color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px">새 답변</span>':'')+
       '<b>'+esc(a.author||'이름 없음')+'</b>'+
       (a.dept?'<span>'+esc(a.dept)+'</span>':'')+
-      '<span>'+fmtTs(a.ts)+'</span>'+
+      '<span>'+fmtTs(a.created_at)+'</span>'+
       '<span class="tag">'+esc(a.kind||'기타')+'</span>'+
     '</div>'+
-    '<p class="op-b">'+esc(a.text||'')+'</p>'+
+    '<p class="op-b">'+esc(a.content||'')+'</p>'+
     (a.ctx?'<div class="askctx">'+esc(a.ctx)+'</div>':'')+
     (a.reply
-      ? '<div class="reply"><div class="rp-h">'+esc(a.replyBy||'담당자')+' · '+
-          (a.replyTs?fmtTs(a.replyTs):'')+'</div><p>'+esc(a.reply)+'</p></div>'
+      ? '<div class="reply"><div class="rp-h">'+esc(a.reply_by||'담당자')+' · '+
+          (a.reply_ts?fmtTs(a.reply_ts):'')+'</div><p>'+esc(a.reply)+'</p></div>'
       : '')+
     '<div class="replyrow" style="margin-top:8px">'+
       (a.reply?'':'<button class="linkbtn" data-openreply="'+esc(a._id)+'">답변 달기</button>')+
@@ -4353,13 +4464,13 @@ function bindAskItems(root){
       return;
     }
     btn.disabled=true; btn.textContent='삭제 중…';
-    try{ await DB.collection('inquiries').doc(id).delete(); unmarkMine('ask',id); }
+    try{ await sbDelete('inquiries', id); unmarkMine('ask',id); await loadInquiries(); }
     catch(e){ btn.disabled=false; btn.textContent='삭제 실패'; }
   }));
 
   root.querySelectorAll('[data-doing]').forEach(btn=>btn.addEventListener('click',async ()=>{
     btn.disabled=true;
-    try{ await DB.collection('inquiries').doc(btn.dataset.doing).update({status:'doing'}); }
+    try{ await sbUpdate('inquiries', btn.dataset.doing, {status:'doing'}); await loadInquiries(); }
     catch(e){ btn.disabled=false; }
   }));
 
@@ -4383,8 +4494,9 @@ function bindAskItems(root){
       const b2=f.querySelector('.btn-sm'); b2.disabled=true; msg.textContent='등록 중…';
       saveWho({name:by, dept:who().dept||''});
       try{
-        await DB.collection('inquiries').doc(id).update({
-          reply:text, replyBy:by, replyTs:Date.now(), status:'done' });
+        await sbUpdate('inquiries', id, {
+          reply:text, reply_by:by, reply_ts:new Date().toISOString(), status:'done' });
+        await loadInquiries();
       }catch(e){ b2.disabled=false; msg.innerHTML='<b style="color:var(--danger)">등록에 실패했습니다.</b>'; }
     });
     ta.focus();
@@ -4427,25 +4539,24 @@ function initAsk(){
     const name=$('#askName').value.trim(), body=$('#askBody').value.trim();
     if(!name){ $('#askMsg').innerHTML='<div class="err-msg">이름을 적어주세요.</div>'; return; }
     if(!body){ $('#askMsg').innerHTML='<div class="err-msg">내용을 적어주세요.</div>'; return; }
-    if(!DB){ $('#askMsg').innerHTML='<div class="err-msg">이 파일에서는 등록할 수 없습니다. 메일로 보내주세요.</div>'; return; }
     saveWho({name:name, dept:$('#askDept').value.trim()});
     const btn=$('#askSend'); btn.disabled=true;
     $('#askMsg').innerHTML='<div class="ok-msg">등록 중…</div>';
     try{
-      const ref=await DB.collection('inquiries').add({
+      const ref=await sbInsert('inquiries', {
         kind:askKind||'기타', author:name, dept:$('#askDept').value.trim(),
-        email:$('#askMail').value.trim(), text:body, ts:Date.now(), status:'wait',
+        email:$('#askMail').value.trim(), content:body, status:'wait',
         ctx: $('#askCtx').checked ? askContext() : ''
       });
-      markMine('ask', ref && ref.id);
+      markMine('ask', ref && ref[0] && ref[0].id);
       $('#askBody').value='';
       askBoxOpen=true;
       $('#askStep2').hidden=true; $('#askStep1').hidden=false;
-      renderAskInbox();
+      await loadInquiries();
       $('#askMsg').innerHTML='';
     }catch(err){
       $('#askMsg').innerHTML='<div class="err-msg">등록에 실패했습니다'+
-        (err&&err.code?' ('+esc(err.code)+')':'')+'. <b>메일로 보내기</b>를 이용해 주세요.</div>';
+        (err&&err.message?' ('+esc(err.message.slice(0,80))+')':'')+'. <b>메일로 보내기</b>를 이용해 주세요.</div>';
     }
     btn.disabled=false;
   });
