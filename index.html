@@ -4030,7 +4030,20 @@ function initDB(){
    별도 try로 감싸 — 이 조회가 실패해도 의견·문의 기능은 영향받지 않는다. */
 async function loadG2bNotices(){
   try{
-    const rows=await sbSelect('g2b_notices?select=id,cid,cn,title,category,budget,close_dt,url&order=close_dt.desc&limit=1000');
+    /* Supabase(PostgREST)는 한 번의 요청으로 내려주는 행 수를 서버 설정으로 1000건까지로
+       강제 제한한다(요청 limit을 5000으로 줘도 응답은 여전히 최대 1000건 + 206 Partial
+       Content) — 지금 전체 건수(1,819건)가 이 상한을 넘어서면서, 한 번만 조회하고 끝내면
+       "마감이 임박한(=가까운 날짜)" 공고 여러 건이 정렬 순서상 뒤로 밀려 통째로 빠지는
+       사고가 났었다(실제로 게시 후 확인해보니 그런 채로 나가 있었음). offset을 옮겨가며
+       200건 이상 남지 않을 때까지 반복 조회해 전체를 다 가져온다. */
+    let rows=[], offset=0;
+    const pageSize=1000;
+    for(let guard=0; guard<10; guard++){
+      const page=await sbSelect('g2b_notices?select=id,cid,cn,title,category,budget,close_dt,url&order=close_dt.desc&limit='+pageSize+'&offset='+offset);
+      rows=rows.concat(page);
+      if(page.length<pageSize) break;
+      offset+=pageSize;
+    }
     G2BALL=rows.map(r=>({_id:r.id, cid:r.cid, cn:r.cn, title:r.title, category:r.category, budget:r.budget, closeDt:r.close_dt, url:r.url}));
     G2BCOUNT={};
     G2BALL.forEach(g=>{ if(g.cid && ddayLabel(g.closeDt)) G2BCOUNT[g.cid]=(G2BCOUNT[g.cid]||0)+1; });
