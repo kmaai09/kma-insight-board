@@ -1069,7 +1069,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <p id="js-check" class="login-err-hard">이 화면에서 자바스크립트가 실행되지 않았습니다.
       파일을 내려받아 브라우저에서 직접 열어 주세요.</p>
     <p class="login-hint">
-      사내 공용 계정 — 아이디 <b>kma</b> · 비밀번호 <b>kma2026</b><br>
+      부서별 계정으로 로그인하세요. 계정 정보는 담당자에게 문의해 주세요.<br>
       <button type="button" class="linkq" id="lg-demo">공용 계정으로 들어가기</button>
     </p>
   </form>
@@ -1086,6 +1086,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <button class="tbtn" id="btnFav" aria-pressed="false">★ 내 거래처 <b id="btnFavN"></b></button>
     <button class="tbtn" id="btnG2bFav">🔖 저장한 공고 <b id="btnG2bFavN"></b></button>
     <button class="tbtn solid" id="btnAsk">문의하기</button>
+    <span class="chip-int" id="whoami" style="display:none"></span>
     <button class="tbtn" id="signout">로그아웃</button>
   </div>
 </div>
@@ -1118,6 +1119,11 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <main>
 <!-- ==================== 요약 인사이트 ==================== -->
 <section class="panel on" id="p-sum" role="tabpanel">
+  <div class="eyebrow"><h2>이번 주 우선 접촉 리스트</h2><p>재활성화 후보 · 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳 — 눌러서 상세로 이동</p></div>
+  <div class="card" id="priorityContactCard">
+    <div id="priorityContactBody"><p class="formhint">불러오는 중…</p></div>
+  </div>
+
   <div class="eyebrow"><h2>데이터가 말해주는 것</h2><p>카드를 누르면 해당 목록으로 이동합니다</p></div>
   <div class="grid g3" id="sumFacts"></div>
 
@@ -1125,6 +1131,16 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
   <div class="card" id="aiInsightCard">
     <div id="aiInsightBody"><p class="formhint">불러오는 중…</p></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn-ghost" id="aiInsightBtn" type="button">🔄 다시 생성</button><span class="formhint" id="aiInsightMsg"></span></div>
+  </div>
+
+  <div class="eyebrow"><h2>리뷰 요청이 필요한 거래처</h2><p>최근 프로젝트가 끝났는데 아직 리뷰가 없는 곳 · 눌러서 바로 리뷰를 남길 수 있습니다</p></div>
+  <div class="card" id="reviewReqCard">
+    <div id="reviewReqBody"><p class="formhint">불러오는 중…</p></div>
+  </div>
+
+  <div class="eyebrow"><h2>나라장터 마감 임박 공고</h2><p>3일 이내 마감되는 공고 · 눌러서 해당 거래처로 이동</p></div>
+  <div class="card" id="g2bDeadlineCard">
+    <div id="g2bDeadlineBody"><p class="formhint">불러오는 중…</p></div>
   </div>
 
   <div class="eyebrow"><h2>전체 규모</h2></div>
@@ -1710,13 +1726,20 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
      단일 HTML 파일이라 계정 확인이 브라우저 안에서만 이뤄진다. 보안 장치가 아니다. -->
 <script>
 (function(){
-  var ACCOUNTS = {"kma":"kma2026"};      // ← 계정을 바꾸려면 이 줄만 고치세요
+  var SUPA_URL = "https://tzfmbowywckfqgseibvh.supabase.co";
+  var SUPA_ANON = "sb_publishable_a4aXa_dIW5RQG2rdcZBlfQ_NkK9V23V";
+  var LOGIN_FN = SUPA_URL + "/functions/v1/board-login";
   var SKEY = "kma-insight-auth";
   var $ = function(id){ return document.getElementById(id); };
   var $login = $('login'), $app = $('app'), $err = $('login-err');
   if ($('js-check')) $('js-check').remove();
   function fail(m){ if($err) $err.textContent = m; }
-  function openApp(){ $login.hidden = true; $app.hidden = false;
+  function paintWhoami(label){
+    var w = $('whoami'); if(!w) return;
+    if(label){ w.textContent = label; w.style.display = ''; } else { w.style.display = 'none'; }
+  }
+  function openApp(label){ $login.hidden = true; $app.hidden = false;
+    paintWhoami(label);
     window.dispatchEvent(new Event('kma-signed-in')); }
   function signOut(){
     try{ sessionStorage.removeItem(SKEY); }catch(e){}
@@ -1724,6 +1747,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     $('login-form').reset(); fail(''); try{ $('lg-id').focus(); }catch(e){}
     /* 로그아웃은 "자리를 비운다"는 뜻에 가깝다 — 다음 사람이 남의 조회 조건을
        그대로 보지 않도록 본문 상태를 되돌린다. */
+    paintWhoami('');
     window.dispatchEvent(new Event('kma-signed-out'));
   }
   function clean(s){
@@ -1731,17 +1755,37 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     try{ s = s.normalize('NFKC'); }catch(e){}
     return s.replace(/[​-‍﻿]/g,'').replace(/\s+/g,'');
   }
+  var loginBusy = false;
   function tryLogin(){
+    if (loginBusy) return false;
     var id = clean($('lg-id').value).toLowerCase(), pw = clean($('lg-pw').value);
-    if (ACCOUNTS[id] !== undefined && ACCOUNTS[id] === pw){
-      try{ sessionStorage.setItem(SKEY, id); }catch(e){}
-      openApp();
-    } else {
-      fail('아이디 또는 비밀번호가 맞지 않습니다.');
-      $('lg-pw').value = ''; try{ $('lg-pw').focus(); }catch(e){}
-    }
+    if (!id || !pw){ fail('아이디와 비밀번호를 입력해 주세요.'); return false; }
+    loginBusy = true; fail('확인 중…');
+    /* 계정·비밀번호(해시)는 이 파일 안에 없다 — Supabase Edge Function(board-login)이
+       서버 쪽에서만 확인하고 성공/실패만 돌려준다. anon 키로는 계정 테이블을 직접
+       읽을 수도 없다(RLS로 막아둠). 이 화면 자체는 여전히 '보안 장치'가 아니다 —
+       세션 복구(맨 아래)도 서버 재확인 없이 sessionStorage만 믿는다. */
+    fetch(LOGIN_FN, {
+      method: 'POST',
+      headers: { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + SUPA_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id, password: pw })
+    }).then(function(r){ return r.json(); }).then(function(j){
+      loginBusy = false;
+      if (j && j.ok){
+        try{ sessionStorage.setItem(SKEY, JSON.stringify({ id: id, label: j.label || id })); }catch(e){}
+        fail('');
+        openApp(j.label || id);
+      } else {
+        fail('아이디 또는 비밀번호가 맞지 않습니다.');
+        $('lg-pw').value = ''; try{ $('lg-pw').focus(); }catch(e){}
+      }
+    }).catch(function(e){
+      loginBusy = false;
+      fail('로그인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    });
     return false;
   }
+
   $('login-form').addEventListener('submit', function(ev){ ev.preventDefault(); tryLogin(); });
   $('lg-go').addEventListener('click', function(ev){ ev.preventDefault(); tryLogin(); });
   ['lg-id','lg-pw'].forEach(function(id){
@@ -1754,7 +1798,10 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     $('lg-id').value='kma'; $('lg-pw').value='kma2026'; tryLogin(); });
   document.addEventListener('click', function(ev){
     if (ev.target && ev.target.id === 'signout') signOut(); });
-  try{ if (sessionStorage.getItem(SKEY) in ACCOUNTS) openApp(); }catch(e){}
+  try{
+    var saved = sessionStorage.getItem(SKEY);
+    if (saved){ var obj = JSON.parse(saved); if (obj && obj.id) openApp(obj.label || obj.id); }
+  }catch(e){}
   if ($login.hidden === false){ try{ $('lg-id').focus(); }catch(e){} }
 })();
 </script>
@@ -2164,6 +2211,37 @@ function bindKpiWhy(hostSel, whySel, list){
   nodes.forEach((n,i)=>{
     const w=list[i] && list[i][4]; if(!w) return;
     n.addEventListener('click',()=>{ const ww=(typeof w==='function')?w():w; showWhy(whySel, ww); });
+  });
+}
+/* ---------- 이번 주 우선 접촉 리스트 (요약 인사이트 탭 맨 위) ----------
+   재활성화 후보(오래 끊긴 관계) + 매출 감소(최근 3년이 이전 3년보다 준 곳)를
+   한 목록으로 묶어 누적 매출이 큰 곳부터 10곳만 보여준다. 두 상태 모두
+   이미 영업 기회 탭에서 쓰는 c.st 분류를 그대로 재사용 — 새 집계 로직 없음. */
+function renderPriorityContacts(){
+  const box=$('#priorityContactBody'); if(!box) return;
+  const react=CL.filter(c=>c.st==='재활성화 후보').map(c=>({c, kind:'react'}));
+  const drop=CL.filter(c=>c.st==='감소').map(c=>({c, kind:'drop'}));
+  const list=react.concat(drop).sort((a,b)=>b.c.t-a.c.t).slice(0,10);
+  if(!list.length){ box.innerHTML='<p class="formhint">해당하는 거래처가 없습니다.</p>'; return; }
+  box.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+list.map((x,i)=>{
+    const c=x.c;
+    const badge = x.kind==='react'
+      ? '<span style="background:#eef2ff;color:#4338ca;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">재활성화 후보</span>'
+      : '<span style="background:#fff1f2;color:#be123c;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">매출 감소</span>';
+    const reason = x.kind==='react'
+      ? '마지막 거래 '+esc(ago(c.mo))
+      : '최근 3년 '+won(c.r3)+'원 (이전 3년 대비 −'+won(c.p3-c.r3)+'원)';
+    return '<button type="button" class="pc-row" data-id="'+esc(c.id)+'" '+
+      'style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid var(--line-c,#e5e7eb);border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;color:inherit">'+
+      '<span style="color:var(--muted-c);font-size:12.5px;width:1.4em;flex:none">'+(i+1)+'</span>'+
+      '<span style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.n)+'</span>'+
+      badge+
+      '<span style="color:var(--muted-c);font-size:12.5px;flex:none">'+reason+'</span>'+
+      '<span style="font-weight:600;font-size:13px;flex:none">누적 '+won(c.t)+'원</span>'+
+    '</button>';
+  }).join('')+'</div>';
+  box.querySelectorAll('.pc-row').forEach(btn=>{
+    btn.addEventListener('click',()=>openClient(btn.getAttribute('data-id')));
   });
 }
 function renderSummary(){
@@ -3140,7 +3218,7 @@ function similarClients(c){
 }
 /* ==================== 거래처 상세 ==================== */
 let curClient=null;
-function openClient(id){
+function openClient(id, wantReviewForm){
   const c=byId[id]; if(!c) return;
   curClient=c;
   const ps=projOf[id]||[];
@@ -3199,7 +3277,14 @@ function openClient(id){
   $('#dx').addEventListener('click',closeDrawer);
   dr.querySelectorAll('[data-go]').forEach(n=>n.addEventListener('click',()=>openClient(n.dataset.go)));
   dr.querySelector('.dbody').scrollTop=0;
-  mountOpinions(c);
+  mountOpinions(c).then(()=>{
+    /* "리뷰 요청 대상" 목록에서 넘어온 경우 — 목록을 다시 훑어보지 않아도
+       바로 리뷰를 쓸 수 있게 폼을 펴고 그 위치로 스크롤한다. */
+    if(wantReviewForm && curClient && curClient.n===c.n){
+      opFlash=''; opFormOpen=true; renderOpBox();
+      const ob=$('#opBox'); if(ob) ob.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
   renderG2B();
   renderClientInsight(c);
   const ciBtn=$('#clientInsightBtn');
@@ -3701,6 +3786,8 @@ const CHAT_NODES={
     quick:[
       {t:'내가 담당하는 거래처부터 보고 싶어요', to:'goal_mine'},
       {t:'오랜만에 연락할 곳을 찾고 싶어요', to:'goal_react'},
+      {t:'리뷰를 남길 때가 됐는지 확인하고 싶어요', to:'goal_review'},
+      {t:'나라장터 마감을 놓치고 싶지 않아요', to:'goal_g2b'},
       {t:'보고서에 쓸 숫자를 확인하고 싶어요', to:'goal_num'},
       {t:'강사를 찾고 있어요', to:'goal_inst'},
       {t:'전체 그림부터 훑어보고 싶어요', to:'goal_all'},
@@ -3713,14 +3800,24 @@ const CHAT_NODES={
     quick:[{t:'거래처 찾기로 이동', go:'p-client'},{t:'내 거래처 더 알아보기', to:'fav'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_react:{
-    bot:'<p><b>영업 기회</b> 탭의 <b>재활성화 후보</b> 카드가 정확히 이 용도예요. 마지막 거래로부터 19~36개월 지난 곳을 모아 두었어요.</p>'+
-      '<p>카드나 목록의 거래처를 누르면 왜 이 후보로 뽑혔는지 계산 근거도 함께 보여줘요. 다만 명단은 수행 이력만으로 뽑힌 것이니, 접촉 전에 담당 PM에게 먼저 확인하세요.</p>',
-    quick:[{t:'영업 기회로 이동', go:'p-opp'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+    bot:'<p><b>요약 인사이트</b> 탭 맨 위의 <b>이번 주 우선 접촉 리스트</b>가 가장 빠른 지름길이에요 — 재활성화 후보와 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳만 골라 보여줘요.</p>'+
+      '<p>전체 명단이 필요하면 <b>영업 기회</b> 탭의 <b>재활성화 후보</b> 카드를 보세요(마지막 거래로부터 19~36개월 지난 곳 전체). 어느 쪽이든 거래처를 누르면 왜 뽑혔는지 계산 근거가 함께 나와요. 다만 명단은 수행 이력만으로 뽑힌 것이니, 접촉 전에 담당 PM에게 먼저 확인하세요.</p>',
+    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'영업 기회로 이동', go:'p-opp'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_num:{
     bot:'<p>요약 카드나 그래프를 누르면 바로 위에 <b>근거 배너</b>가 뜨고, 어떤 숫자를 어떻게 계산했는지 식으로 보여줘요.</p>'+
       '<p>회계연도 기준·2026년은 8월까지·교육 분야는 추정값 같은 공통 기준은 <b>데이터 기준</b> 탭에 정리돼 있으니, 보고서에 인용하기 전에 한 번 보세요.</p>',
     quick:[{t:'데이터 기준으로 이동', go:'p-note'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+  },
+  goal_review:{
+    bot:'<p><b>요약 인사이트</b> 탭의 <b>리뷰 요청이 필요한 거래처</b> 카드가 이 용도예요. 마지막 거래로부터 2~12개월 지났는데 아직 리뷰가 하나도 없는 곳을, 누적 매출이 큰 순서로 최대 10곳 보여줘요.</p>'+
+      '<p>목록에서 거래처를 누르면 상세 화면으로 이동하면서 리뷰 작성 칸이 바로 펼쳐지고 그 위치로 스크롤돼요.</p>',
+    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+  },
+  goal_g2b:{
+    bot:'<p><b>요약 인사이트</b> 탭의 <b>나라장터 마감 임박 공고</b> 카드에서 마감까지 3일 이내 남은 공고만 모아 보여줘요. 누르면 해당 거래처 상세 화면으로 바로 이동해요.</p>'+
+      '<p>발주기관명이 거래처명과 <b>정확히 일치</b>하는 공고만 자동으로 연결돼요 — 표기가 비슷하기만 한 건 잘못 붙일 위험이 있어 일부러 자동 연결하지 않아요. 눈여겨볼 공고는 각 거래처 상세의 나라장터 목록에서 별(★)로 따로 저장해 둘 수 있어요.</p>',
+    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_inst:{
     bot:'<p><b>강사 풀</b> 탭에서 이름·분야·소속으로 검색할 수 있어요. 행을 누르면 상세 정보가 열려요.</p>',
@@ -3770,8 +3867,8 @@ const CHAT_NODES={
     quick:[{t:'문의하기 열기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   login:{
-    bot:'<p>로그인은 <b>화면 가림막일 뿐 진짜 보안 장치는 아니에요.</b> 계정 정보가 파일 안에 그대로 들어 있으니 외부에 공유하지 않도록 주의해 주세요.</p>'+
-      '<p>이 보드 자체도 <b>사내 전용</b>이라 외부에 공개 공유되지 않아요.</p>',
+    bot:'<p>로그인은 <b>화면 가림막일 뿐 진짜 보안 장치는 아니에요.</b> 부서별 계정으로 나뉘어 있지만, 이건 즐겨찾기 같은 조회 화면을 사람별로 구분해 두려는 목적일 뿐이고, 데이터 자체는 로그인 여부와 상관없이 항상 조회 가능한 구조예요.</p>'+
+      '<p>계정(아이디·비밀번호)은 이 화면 안이 아니라 별도로 안전하게 보관되어 있어요 — 잊어버렸거나 새 계정이 필요하면 담당자에게 문의해 주세요. 이 보드 자체도 <b>사내 전용</b>이라 외부에 공개 공유되지 않아요.</p>',
     quick:[{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
 };
@@ -3935,6 +4032,29 @@ async function loadInquiries(){
   renderAskBadge();
 }
 let REVIEWS=[], REVIEWSREADY=false;
+/* ---------- 리뷰 요청이 필요한 거래처 (요약 인사이트 탭, AI 인사이트 카드 아래) ----------
+   "프로젝트 마지막 거래로부터 N개월 뒤" 리뷰를 요청하자는 방향으로, 이미 재활성화
+   후보(19개월부터)로 넘어가기 전 구간(2~12개월)만 본다 — 그 뒤는 재활성화 후보
+   목록이 이미 다루는 영역이라 겹치지 않게 나눔. 외부 알림은 없고 보드 안에서만
+   눈에 띄게 보여주는 것으로 결정(2026-09-23). */
+const REVIEW_REQ_MIN_MO=2, REVIEW_REQ_MAX_MO=12;
+function renderReviewRequests(){
+  const box=$('#reviewReqBody'); if(!box) return;
+  const targets=CL.filter(c=>c.mo>=REVIEW_REQ_MIN_MO && c.mo<=REVIEW_REQ_MAX_MO && !(OPCOUNT[c.n]>0))
+    .sort((a,b)=>b.t-a.t).slice(0,10);
+  if(!targets.length){ box.innerHTML='<p class="formhint">지금은 리뷰를 요청할 만한 거래처가 없습니다.</p>'; return; }
+  box.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+targets.map(c=>{
+    return '<button type="button" class="rr-row" data-id="'+esc(c.id)+'" '+
+      'style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid var(--line-c,#e5e7eb);border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;color:inherit">'+
+      '<span style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.n)+'</span>'+
+      '<span style="color:var(--muted-c);font-size:12.5px;flex:none">마지막 거래 '+esc(ago(c.mo))+'</span>'+
+      '<span style="background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap;flex:none">✎ 리뷰 남기기</span>'+
+    '</button>';
+  }).join('')+'</div>';
+  box.querySelectorAll('.rr-row').forEach(btn=>{
+    btn.addEventListener('click',()=>openClient(btn.getAttribute('data-id'), true));
+  });
+}
 async function refreshReviewCounts(){
   try{
     const rows=await sbSelect('reviews?select=company_name');
@@ -3949,10 +4069,48 @@ async function loadCompanyReviews(name){
   }catch(e){ REVIEWS=[]; }
   REVIEWSREADY=true;
 }
-function initReviews(){ refreshReviewCounts(); }
+async function initReviews(){ await refreshReviewCounts(); renderReviewRequests(); }
 
 /* ---------- 리뷰 기반 AI 인사이트 (요약 인사이트 탭) ---------- */
 function formatInsightHtml(text){
+  if(!text) return '';
+  /* 2026-09-23: 인사이트 저장 형식을 "한 문장+불릿"(순수 텍스트)에서 구조화된 JSON
+     {summary, positives[], risks[], action} 으로 바꿨다(가독성 개선 요청 반영).
+     새 형식이면 강점/유의점을 분리된 카드로, 추천 액션을 별도 박스로 보여준다.
+     예전 형식으로 이미 저장된 캐시 데이터(순수 텍스트)는 JSON 파싱이 실패하므로
+     아래 catch에서 기존 방식 그대로 렌더링한다(하위 호환). */
+  try{
+    var obj=JSON.parse(text);
+    if(obj && typeof obj.summary==='string'){
+      var html='<p style="font-weight:600;font-size:15px;margin:0 0 12px;line-height:1.5">'+esc(obj.summary)+'</p>';
+      var pos=(obj.positives||[]).filter(Boolean);
+      var risk=(obj.risks||[]).filter(Boolean);
+      if(pos.length || risk.length){
+        html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px">';
+        if(pos.length){
+          html+='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px">'+
+            '<div style="font-weight:600;font-size:12.5px;color:#15803d;margin-bottom:6px">👍 강점</div>'+
+            '<ul style="margin:0;padding-left:18px;line-height:1.7;font-size:13px">'+
+              pos.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+
+            '</ul></div>';
+        }
+        if(risk.length){
+          html+='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px">'+
+            '<div style="font-weight:600;font-size:12.5px;color:#b45309;margin-bottom:6px">⚠️ 유의할 점</div>'+
+            '<ul style="margin:0;padding-left:18px;line-height:1.7;font-size:13px">'+
+              risk.map(function(r){return '<li>'+esc(r)+'</li>';}).join('')+
+            '</ul></div>';
+        }
+        html+='</div>';
+      }
+      if(obj.action){
+        html+='<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6">'+
+          '<b style="color:#1d4ed8">🎯 추천 액션</b> · '+esc(obj.action)+
+        '</div>';
+      }
+      return html;
+    }
+  }catch(e){ /* JSON이 아니면 예전 방식(순수 텍스트)으로 폴백 */ }
   var lines=(text||'').split(/\n+/).map(function(l){return l.trim();}).filter(Boolean);
   if(!lines.length) return '';
   var head=lines[0];
@@ -4048,6 +4206,7 @@ async function loadG2bNotices(){
     G2BCOUNT={};
     G2BALL.forEach(g=>{ if(g.cid && ddayLabel(g.closeDt)) G2BCOUNT[g.cid]=(G2BCOUNT[g.cid]||0)+1; });
     renderG2B();
+    renderG2bDeadlineAlerts();
     if($('#g2bFavModal') && $('#g2bFavModal').classList.contains('on')) renderG2bFavModal();
     if(typeof drawClients==='function') drawClients(false);
   }catch(e){ try{ console.warn('[g2b] load failed', e); }catch(_){} }
@@ -4178,6 +4337,32 @@ function renderOpBox(){
    하루 1회, 발주기관명을 거래처명과 "정확히 일치하는 것만" 맞춰서 Supabase g2b_notices 테이블에 넣어 둔다
    (표기가 비슷하기만 한 것은 오매칭 위험이 있어 자동 연결하지 않는다). 이 화면은 그 결과를
    cid 기준으로 걸러서 마감이 지나지 않은 것만 보여줄 뿐, 나라장터로 직접 요청하지 않는다. */
+/* "나라장터 마감 임박 공고" 카드 — 개발자 제안 중 하나로 추가(2026-09-23).
+   위치는 "요약 인사이트 탭에 카드로"(사용자 선택), 임박 기준은 "3일 이내"(사용자 선택) —
+   기존에 목록 화면에서 D-1~D-3/오늘 마감을 강조(.wn 클래스)하던 기준과 동일하게 맞췄다. */
+function renderG2bDeadlineAlerts(){
+  const box=$('#g2bDeadlineBody'); if(!box) return;
+  const items=(G2BALL||[]).map(g=>({g, dday:ddayLabel(g.closeDt)}))
+    .filter(r=>r.g.cid && r.dday && (r.dday==='오늘 마감' || /^D-[1-3]$/.test(r.dday)))
+    .sort((a,b)=>new Date(a.g.closeDt)-new Date(b.g.closeDt))
+    .slice(0,10);
+  if(!items.length){ box.innerHTML='<p class="formhint">3일 이내 마감되는 나라장터 공고가 없습니다.</p>'; return; }
+  box.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+items.map(r=>{
+    const g=r.g;
+    const warn = r.dday==='오늘 마감' || r.dday==='D-1';
+    const badge='<span style="background:'+(warn?'#fef2f2':'#fff7ed')+';color:'+(warn?'#b91c1c':'#c2410c')+';border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">'+esc(r.dday)+'</span>';
+    return '<button type="button" class="g2bd-row" data-id="'+esc(g.cid)+'" '+
+      'style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid var(--line-c,#e5e7eb);border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;color:inherit">'+
+      badge+
+      '<span style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.title||'(제목 없음)')+'</span>'+
+      '<span style="color:var(--muted-c);font-size:12.5px;flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.cn||'')+'</span>'+
+    '</button>';
+  }).join('')+'</div>';
+  box.querySelectorAll('.g2bd-row').forEach(btn=>{
+    const id=btn.getAttribute('data-id');
+    if(id) btn.addEventListener('click',()=>openClient(id));
+  });
+}
 function ddayLabel(closeDt){
   const t=new Date(String(closeDt).replace(' ','T'));
   if(isNaN(t)) return null;
@@ -4722,6 +4907,7 @@ syncG2bFavBtn();
 $('#asof').textContent='2019–2026 · 기준 '+D.meta.asof;
 
 renderSummary();
+renderPriorityContacts();
 renderOverview();
 initClientFilters();
 drawClients(true);
