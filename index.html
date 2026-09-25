@@ -52,7 +52,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);
-  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
 h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
 button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
@@ -237,11 +237,6 @@ button.fact:hover{background:var(--surface-c)}
 .fact .f-d{font-size:13px;line-height:20px;color:var(--body-c)}
 .fact{gap:4px}
 .fact .f-t{margin-bottom:2px}
-.guide{display:grid;gap:2px}
-.guide button{background:none;border:0;border-radius:var(--r-ctl);text-align:left;padding:12px;display:grid;gap:2px}
-.guide button:hover{background:var(--surface-c)}
-.guide .g-t{font-size:15px;font-weight:600;color:var(--fg)}
-.guide .g-d{font-size:13px;line-height:20px;color:var(--muted-c)}
 
 /* ---------- 막대 ---------- */
 .blist{display:grid;gap:8px}
@@ -451,6 +446,8 @@ td.num{font-variant-numeric:tabular-nums}
   border-radius:var(--r-chip);padding:1px 8px;margin:0 4px 4px 0;white-space:nowrap}
 .tag.hi{background:var(--weak-bg);color:var(--weak-fg);font-weight:600}
 .tag.wn{background:var(--warn-bg);color:var(--warn-c);font-weight:600}
+.tag.sub-badge,.tag.ord-ctrl{cursor:pointer}
+.tag.ord-ctrl{background:none;box-shadow:inset 0 0 0 1px var(--border-c)}
 
 /* ---------- 강사 아바타 (사진 준비 전엔 이니셜 원) ---------- */
 .namewrap{display:inline-flex;align-items:center;gap:8px}
@@ -1040,6 +1037,14 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 .cqbtn:hover{border-color:var(--primary);color:var(--primary)}
 .cqbtn.go{background:var(--weak-bg);border-color:transparent;color:var(--weak-fg);font-weight:700}
 .cqbtn.back{color:var(--muted-c)}
+.chat-input{flex:none;display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border-c);background:var(--bg)}
+.chat-input input{flex:1;min-width:0;border:1px solid var(--border-c);border-radius:999px;padding:9px 14px;font-size:13px;background:var(--canvas);color:var(--fg)}
+.chat-input input:focus{outline:none;border-color:var(--primary)}
+.chat-input button{flex:none;width:36px;height:36px;border-radius:50%;border:none;background:var(--primary);color:var(--on-primary);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.chat-input button:disabled{opacity:.5;cursor:default}
+.chist-lbl{font-size:11px;color:var(--muted-c);text-align:center;margin:2px 0 6px}
+.chist-end{margin:2px 0 10px}
+.chist-end hr{border:none;border-top:1px dashed var(--border-c)}
 
 /* 표 머리 고정 — 표가 다 들어가는 넓이에서만. overflow:clip은 스크롤 컨테이너가 아니라서
    sticky가 화면(문서) 기준으로 동작하고, 둥근 모서리도 그대로 유지된다.
@@ -1119,11 +1124,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <main>
 <!-- ==================== 요약 인사이트 ==================== -->
 <section class="panel on" id="p-sum" role="tabpanel">
-  <div class="eyebrow"><h2>이번 주 우선 접촉 리스트</h2><p>재활성화 후보 · 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳 — 눌러서 상세로 이동</p></div>
-  <div class="card" id="priorityContactCard">
-    <div id="priorityContactBody"><p class="formhint">불러오는 중…</p></div>
-  </div>
-
   <div class="eyebrow"><h2>데이터가 말해주는 것</h2><p>카드를 누르면 해당 목록으로 이동합니다</p></div>
   <div class="grid g3" id="sumFacts"></div>
 
@@ -1131,16 +1131,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
   <div class="card" id="aiInsightCard">
     <div id="aiInsightBody"><p class="formhint">불러오는 중…</p></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn-ghost" id="aiInsightBtn" type="button">🔄 다시 생성</button><span class="formhint" id="aiInsightMsg"></span></div>
-  </div>
-
-  <div class="eyebrow"><h2>리뷰 요청이 필요한 거래처</h2><p>최근 프로젝트가 끝났는데 아직 리뷰가 없는 곳 · 눌러서 바로 리뷰를 남길 수 있습니다</p></div>
-  <div class="card" id="reviewReqCard">
-    <div id="reviewReqBody"><p class="formhint">불러오는 중…</p></div>
-  </div>
-
-  <div class="eyebrow"><h2>나라장터 마감 임박 공고</h2><p>3일 이내 마감되는 공고 · 눌러서 해당 거래처로 이동</p></div>
-  <div class="card" id="g2bDeadlineCard">
-    <div id="g2bDeadlineBody"><p class="formhint">불러오는 중…</p></div>
   </div>
 
   <div class="eyebrow"><h2>전체 규모</h2></div>
@@ -1178,9 +1168,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
       <div class="blist" id="sumField"></div>
     </div>
   </div>
-
-  <div class="eyebrow"><h2>읽는 순서</h2></div>
-  <div class="card"><div class="guide" id="sumGuide"></div></div>
 </section>
 
 <!-- ==================== 전사 현황 ==================== -->
@@ -1272,6 +1259,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <div class="chips" id="fState"></div>
     <button class="chip favchip" id="fFav" aria-pressed="false"
       title="별을 눌러 담아둔 거래처만 봅니다">★ 내 거래처 <small></small></button>
+    <button class="chip" id="fOrderer" type="button" aria-pressed="false"
+      title="우리가 공고를 받아 수주하는 발주처만 보고, 하청·중개업체로 분류된 곳은 뺍니다">발주처만 보기</button>
     <button class="chip" id="fHasOp" aria-pressed="false" hidden
       title="동료가 협업 경험을 남긴 거래처만 봅니다">의견 있음 <small></small></button>
     <button class="chip" id="fHasG2b" aria-pressed="false" hidden
@@ -1341,7 +1330,26 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <!-- ==================== 영업 기회 ==================== -->
 <section class="panel" id="p-opp" role="tabpanel">
   <div id="whyOpp" hidden></div>
+  <div class="chips" style="margin-bottom:12px">
+    <button class="chip" id="fOppOrderer" type="button" aria-pressed="false"
+      title="공고를 직접 내는 발주처만 집계하고, 하청·중개업체로 분류된 곳은 빼고 봅니다">발주처만 보기</button>
+  </div>
   <div class="kpis" id="oppKpis"></div>
+
+  <div class="eyebrow"><h2>이번 주 우선 접촉 리스트</h2><p>재활성화 후보 · 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳 — 눌러서 상세로 이동</p></div>
+  <div class="card" id="priorityContactCard">
+    <div id="priorityContactBody"><p class="formhint">불러오는 중…</p></div>
+  </div>
+
+  <div class="eyebrow"><h2>리뷰 요청이 필요한 거래처</h2><p>최근 프로젝트가 끝났는데 아직 리뷰가 없는 곳 · 눌러서 바로 리뷰를 남길 수 있습니다</p></div>
+  <div class="card" id="reviewReqCard">
+    <div id="reviewReqBody"><p class="formhint">불러오는 중…</p></div>
+  </div>
+
+  <div class="eyebrow"><h2>나라장터 마감 임박 공고</h2><p>3일 이내 마감되는 공고 · 눌러서 해당 거래처로 이동</p></div>
+  <div class="card" id="g2bDeadlineCard">
+    <div id="g2bDeadlineBody"><p class="formhint">불러오는 중…</p></div>
+  </div>
 
   <div class="eyebrow"><h2>어디에서 새고, 어디에서 늘고 있나</h2>
     <p>최근 3년(2024–2026)과 이전 3년(2021–2023)을 비교합니다</p></div>
@@ -1564,12 +1572,11 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
       <div class="qa">
         <h4>분류는 믿을 만한가</h4>
         <p>강의 주제와 세부분야를 보고 <b>자동으로</b> 판정했습니다. 주제가 비어 있어
-          근거가 약한 290명은 명단에 <b>추정</b>이라고 표시해 두었습니다.</p>
+          근거가 약한 284명은 명단에 <b>추정</b>이라고 표시해 두었습니다.</p>
       </div>
       <div class="qa">
         <h4>남은 문제</h4>
-        <p><b>이름이 같은 470건</b>은 동일인인지 확정하지 못했습니다(강사 풀 탭의
-          「이름 중복」으로 확인). 플랫폼 수집본에는 <b>상임/비상임 구분과 경력 연차가 없습니다.</b></p>
+        <p>이름이 같은 레코드는 2026-09-17에 동일인 여부를 자동 판정해 <b>모두 정리했습니다</b>(현재 동명이인으로 남은 사례 없음). 플랫폼 수집본에는 <b>상임/비상임 구분과 경력 연차가 없습니다.</b></p>
       </div>
     </div>
   </div>
@@ -1624,6 +1631,10 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <button class="dclose" id="chatClose" type="button" aria-label="닫기">✕</button>
   </div>
   <div class="chat-body" id="chatBody"></div>
+  <form class="chat-input" id="chatInputForm">
+    <input id="chatFreeInput" type="text" placeholder="궁금한 걸 직접 입력해 보세요 (예: 고용노동부 최근에 어떤 걸 했나요?)" autocomplete="off" maxlength="300">
+    <button type="submit" id="chatSendBtn" aria-label="보내기">➤</button>
+  </form>
 </aside>
 
 <div class="scrim" id="scrim"></div>
@@ -1809,6 +1820,18 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <script>
 (async function(){
 'use strict';
+/* 로그인 계정별로 "내 거래처"·"저장한 공고"·"내가 쓴 글" 등을 완전히 분리해서 저장하기 위한 키.
+   로그인 화면 스크립트가 sessionStorage에 저장하는 것과 같은 키 이름을 그대로 참조한다
+   (스크립트 두 개가 변수는 못 나누지만 문자열 키는 그대로 공유할 수 있다). */
+function curAcctId(){
+  try{
+    const s=sessionStorage.getItem('kma-insight-auth');
+    if(!s) return '_guest';
+    const o=JSON.parse(s);
+    return (o && o.id) ? String(o.id) : '_guest';
+  }catch(e){ return '_guest'; }
+}
+function acctKey(base){ return base+'__'+curAcctId(); }
 async function fetchAll(table){
   const SUPA_URL='https://tzfmbowywckfqgseibvh.supabase.co';
   const SUPA_KEY='sb_publishable_a4aXa_dIW5RQG2rdcZBlfQ_NkK9V23V';
@@ -1842,6 +1865,12 @@ try{
 }
 const YEARS = D.meta.years, NY = YEARS.length;
 const CL = D.clients, PJ = D.projects, INS = D.instructors;
+/* 발주처/하청 수동 수정값 — 테이블이 아직 없거나 조회가 안 되면 빈 값으로 조용히 넘어간다 */
+let CLIENT_OVERRIDES = {};
+try{
+  const ovRows = await fetchAll('client_overrides');
+  ovRows.forEach(r=>{ CLIENT_OVERRIDES[r.id] = r; });
+}catch(e){ /* 테이블 준비 전이면 자동 추정만 사용 */ }
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const el = (t,c,h) => { const n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n; };
@@ -1887,6 +1916,59 @@ CL.forEach(c=>{
   c.kDiv  = c.dset.join(' ').toLowerCase();
 });
 const byId={}; CL.forEach(c=>byId[c.id]=c);
+/* ---------- 발주처/하청 자동 추정 ----------
+   공공기관·지자체·대학 등 공공섹터는 스스로 공고를 내는 발주처로 본다.
+   민간기업 중 이름에 교육·인사 위탁/중개업 느낌의 키워드가 있는 곳만
+   "하청 가능성(추정)" 배지를 붙인다 — 틀릴 수 있으니 배지를 눌러 직접 고칠 수 있게 한다. */
+const SUB_KEYWORDS=['컨설팅','아웃소싱','에듀코','서치펌','헤드헌팅','스탭스','BPO','에이치알','HR솔루션'];
+function ordererStatus(c){
+  const ov=CLIENT_OVERRIDES[c.id];
+  if(ov && ov.is_orderer===true) return {v:'orderer', src:'manual'};
+  if(ov && ov.is_orderer===false) return {v:'sub', src:'manual'};
+  if(c.sec==='공공') return {v:'orderer', src:'auto'};
+  const nm=c.n||'';
+  if(SUB_KEYWORDS.some(k=>nm.includes(k))) return {v:'sub', src:'auto'};
+  return {v:'orderer', src:'auto'};
+}
+CL.forEach(c=>{ const s=ordererStatus(c); c.ordSt=s.v; c.ordSrc=s.src; });
+function ordererBadge(c){
+  if(c.ordSt!=='sub') return '';
+  const manual=c.ordSrc==='manual';
+  return '<span class="tag wn sub-badge" data-ord-toggle="'+esc(c.id)+'" title="'+
+    (manual?'하청업체로 직접 표시해 둔 곳입니다. 눌러서 발주처로 되돌릴 수 있어요.'
+      :'회사 이름으로 미루어 하청·위탁 중개업체일 가능성이 있다고 자동으로 추정한 것입니다 — 실제로는 발주처라면 눌러서 고쳐주세요.')+
+    '">'+(manual?'하청업체':'하청 가능성(추정)')+'</span>';
+}
+/* 거래처 상세용 — 발주처로 분류된 곳도 눌러서 하청으로 바꿀 수 있게, 항상 보이는 작은 표시 */
+function ordererControl(c){
+  const isSub=c.ordSt==='sub';
+  const manual=c.ordSrc==='manual';
+  const label=isSub?(manual?'하청업체':'하청 가능성(추정)'):(manual?'발주처(직접 지정)':'발주처');
+  const hint=isSub
+    ?'눌러서 발주처로 바꿀 수 있어요.'
+    :'눌러서 하청업체로 바꿀 수 있어요 — 실제로 발주처가 맞다면 그대로 두세요.';
+  return '<span class="tag ord-ctrl'+(isSub?' wn sub-badge':'')+'" data-ord-toggle="'+esc(c.id)+'" title="'+hint+'">'+esc(label)+' <span style="opacity:.6">✎</span></span>';
+}
+async function setOrdererOverride(id, isOrderer){
+  try{
+    if(CLIENT_OVERRIDES[id]){
+      await sbUpdate('client_overrides', id, {is_orderer:isOrderer, updated_at:new Date().toISOString()});
+    }else{
+      await sbInsert('client_overrides', {id, is_orderer:isOrderer, updated_at:new Date().toISOString()});
+    }
+    CLIENT_OVERRIDES[id]={id, is_orderer:isOrderer};
+    const c=byId[id]; if(c){ const s=ordererStatus(c); c.ordSt=s.v; c.ordSrc=s.src; }
+  }catch(e){
+    alert('아직 이 기능을 쓸 준비가 안 됐어요 — 담당자에게 문의해 주세요.');
+  }
+}
+document.addEventListener('click', function(ev){
+  const t=ev.target.closest('[data-ord-toggle]'); if(!t) return;
+  ev.stopPropagation();
+  const id=t.dataset.ordToggle; const c=byId[id]; if(!c) return;
+  const makeOrderer=c.ordSt==='sub'; /* 하청 표시면 발주처로, 발주처 표시면 하청으로 뒤집는다 */
+  setOrdererOverride(id, makeOrderer).then(()=>{ if(curClient&&curClient.id===id) openClient(id); drawClients(); renderOpp(); });
+});
 const projOf={}; PJ.forEach(p=>{ (projOf[p[1]]=projOf[p[1]]||[]).push(p); });
 Object.values(projOf).forEach(a=>a.sort((x,y)=>(y[3]||'').localeCompare(x[3]||'')));
 
@@ -2213,7 +2295,7 @@ function bindKpiWhy(hostSel, whySel, list){
     n.addEventListener('click',()=>{ const ww=(typeof w==='function')?w():w; showWhy(whySel, ww); });
   });
 }
-/* ---------- 이번 주 우선 접촉 리스트 (요약 인사이트 탭 맨 위) ----------
+/* ---------- 이번 주 우선 접촉 리스트 (영업 기회 탭 맨 위 · 2026-09-23 요약 인사이트에서 이동) ----------
    재활성화 후보(오래 끊긴 관계) + 매출 감소(최근 3년이 이전 3년보다 준 곳)를
    한 목록으로 묶어 누적 매출이 큰 곳부터 10곳만 보여준다. 두 상태 모두
    이미 영업 기회 탭에서 쓰는 c.st 분류를 그대로 재사용 — 새 집계 로직 없음. */
@@ -2456,19 +2538,6 @@ function renderSummary(){
       '%)<br>프로젝트 <b>'+cnt(f.n)+'</b>건',
     click:()=>goClient({field:f.k})
   })));
-
-  const guide=[
-    ['전사 현황','규모와 추세, 어디에서 매출이 나오는지','p-over'],
-    ['거래처 찾기','조건으로 좁혀 한 거래처를 파악할 때','p-client'],
-    ['영업 기회','접촉할 곳을 고를 때','p-opp'],
-    ['강사 풀','이 분야 강사가 몇 명 있는지 볼 때','p-inst'],
-    ['데이터 기준','숫자를 보고에 인용하기 전에','p-note']
-  ];
-  const gd=$('#sumGuide'); gd.innerHTML='';
-  guide.forEach(g=>{
-    const b=el('button',null,'<span class="g-t">'+g[0]+'</span><span class="g-d">'+g[1]+'</span>');
-    b.type='button'; b.addEventListener('click',()=>goTab(g[2])); gd.appendChild(b);
-  });
 
 }
 
@@ -2823,14 +2892,14 @@ function ytopHTML(all,rev){
 }
 
 /* ==================== 거래처 찾기 ==================== */
-const F={q:'',seg:'',sec:'',field:'',div:'',pm:'',rev:0,years:0,states:new Set(),hasOp:false,hasG2b:false,fav:false};
+const F={q:'',seg:'',sec:'',field:'',div:'',pm:'',rev:0,years:0,states:new Set(),hasOp:false,hasG2b:false,fav:false,orderer:false};
 
 /* ---------- 내 거래처 ----------
-   이 브라우저에만 저장됩니다. 담당 PM 배정과 실제로 챙기는 거래처는 다르기 때문에,
+   이 브라우저의 이 계정에만 저장됩니다(계정마다 따로 저장됨). 담당 PM 배정과 실제로 챙기는 거래처는 다르기 때문에,
    사람마다 자기 목록을 따로 들고 있게 했습니다. */
 const FAVKEY='kma-insight-fav';
-let FAV=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem(FAVKEY)||'[]')); }catch(e){ return new Set(); } })();
-function saveFav(){ try{ localStorage.setItem(FAVKEY, JSON.stringify(Array.from(FAV))); }catch(e){} }
+let FAV=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem(acctKey(FAVKEY))||'[]')); }catch(e){ return new Set(); } })();
+function saveFav(){ try{ localStorage.setItem(acctKey(FAVKEY), JSON.stringify(Array.from(FAV))); }catch(e){} }
 const STAR='<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">'+
   '<path d="M10 1.6l2.47 5.3 5.53.66-4.1 3.9 1.1 5.6L10 14.3l-4.99 2.76 1.1-5.6-4.1-3.9 5.53-.66z"/></svg>';
 function toggleFav(id){
@@ -2840,10 +2909,10 @@ function toggleFav(id){
 }
 /* ---------- 저장한 공고 ----------
    "내 거래처"와 같은 패턴 — 거래처가 아니라 공고(나라장터 건) 단위로 담아 둔다.
-   이 브라우저에만 저장되고, 거래처를 넘나드는 목록이라 상단바 버튼 → 별도 창으로 모아 본다. */
+   이 브라우저의 이 계정에만 저장되고(계정마다 따로 저장됨), 거래처를 넘나드는 목록이라 상단바 버튼 → 별도 창으로 모아 본다. */
 const G2BFAVKEY='kma-insight-g2bfav';
-let G2BFAV=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem(G2BFAVKEY)||'[]')); }catch(e){ return new Set(); } })();
-function saveG2bFav(){ try{ localStorage.setItem(G2BFAVKEY, JSON.stringify(Array.from(G2BFAV))); }catch(e){} }
+let G2BFAV=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem(acctKey(G2BFAVKEY))||'[]')); }catch(e){ return new Set(); } })();
+function saveG2bFav(){ try{ localStorage.setItem(acctKey(G2BFAVKEY), JSON.stringify(Array.from(G2BFAV))); }catch(e){} }
 function toggleG2bFav(id){
   if(!id) return;
   if(G2BFAV.has(id)) G2BFAV.delete(id); else G2BFAV.add(id);
@@ -2916,6 +2985,11 @@ function initClientFilters(){
   $('#fFav').addEventListener('click',()=>{
     F.fav=!F.fav;
     $('#fFav').setAttribute('aria-pressed', F.fav?'true':'false');
+    clearWhy(); drawClients(true);
+  });
+  $('#fOrderer').addEventListener('click',()=>{
+    F.orderer=!F.orderer;
+    $('#fOrderer').setAttribute('aria-pressed', F.orderer?'true':'false');
     clearWhy(); drawClients(true);
   });
   $('#fHasOp').addEventListener('click',()=>{
@@ -3066,7 +3140,8 @@ function syncHeaderFilters(){
 }
 function clearClientFilters(){
   if(typeof closeMainFilterPop==='function') closeMainFilterPop();
-  F.q='';F.seg='';F.sec='';F.field='';F.div='';F.pm='';F.rev=0;F.years=0;F.states.clear();F.hasOp=false;F.hasG2b=false;F.fav=false;
+  F.q='';F.seg='';F.sec='';F.field='';F.div='';F.pm='';F.rev=0;F.years=0;F.states.clear();F.hasOp=false;F.hasG2b=false;F.fav=false;F.orderer=false;
+  const orb=$('#fOrderer'); if(orb) orb.setAttribute('aria-pressed','false');
   const ob=$('#fHasOp'); if(ob) ob.setAttribute('aria-pressed','false');
   const gb=$('#fHasG2b'); if(gb) gb.setAttribute('aria-pressed','false');
   const fb=$('#fFav'); if(fb) fb.setAttribute('aria-pressed','false');
@@ -3100,6 +3175,7 @@ function filterClients(){
     if(F.hasOp && !(OPCOUNT[c.id]>0)) return false;
     if(F.hasG2b && !(G2BCOUNT[c.id]>0)) return false;
     if(F.fav && !FAV.has(c.id)) return false;
+    if(F.orderer && c.ordSt!=='orderer') return false;
     return true;
   });
 }
@@ -3152,6 +3228,7 @@ function drawClients(reset){
         'aria-label="'+(FAV.has(c.id)?'내 거래처 해제':'내 거래처에 담기')+'">'+STAR+'</button></td>'+
       '<td><div class="tnamewrap"><span class="tname">'+esc(c.n)+'</span>'+
         (gc?'<span class="tag hi" title="지금 진행 중인 나라장터 공고 '+gc+'건">🔔 '+gc+'</span>':'')+
+        ordererBadge(c)+
         '</div>'+
         '<span class="tsub">'+esc(c.sg)+
         (c.sec&&c.sec!=='미분류'?' · '+esc(c.sec):'')+(fd?' · '+fd:'')+'</span></td>'+
@@ -3228,7 +3305,7 @@ function openClient(id, wantReviewForm){
   const html=
   '<div class="dhead"><div style="flex:1;min-width:0">'+
     '<h2>'+esc(c.n)+'</h2>'+
-    '<div class="meta"><span class="pill '+stateCls[c.st]+'">'+esc(c.st)+'</span>'+
+    '<div class="meta">'+ordererControl(c)+'<span class="pill '+stateCls[c.st]+'">'+esc(c.st)+'</span>'+
       '<span>'+esc(c.sg)+'</span><span>·</span><span>'+esc(c.sec==='미분류'?'공공/민간 미분류':c.sec)+'</span>'+
       '<span>·</span><span>최근 거래 '+(c.l||'—')+' ('+ago(c.mo)+')</span></div></div>'+
     '<button class="dfav" id="dFav" type="button" aria-pressed="false"></button>'+
@@ -3258,6 +3335,9 @@ function openClient(id, wantReviewForm){
       '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
         '<button class="btn-ghost" id="clientInsightBtn" type="button">🔄 다시 생성</button>'+
         '<span class="formhint" id="clientInsightMsg"></span></div></div>'+
+    '<div class="card" id="clientNewsCard"><h3>최근 뉴스</h3>'+
+      '<p class="sub">네이버 뉴스에서 거래처명으로 검색한 결과입니다 · 참고용</p>'+
+      '<div id="clientNewsBody"><p class="formhint">불러오는 중…</p></div></div>'+
     '<div class="card" id="opCard"><h3>이 거래처에 대한 의견</h3>'+
       '<p class="sub">담당자가 알아야 할 <b>협업 경험</b>을 남겨주세요 — 의사결정 속도, 요구 수준, 정산 처리, 담당자 교체 등.</p>'+
       '<div id="opBox"></div></div>'+
@@ -3287,6 +3367,7 @@ function openClient(id, wantReviewForm){
   });
   renderG2B();
   renderClientInsight(c);
+  renderClientNews(c);
   const ciBtn=$('#clientInsightBtn');
   if(ciBtn) ciBtn.addEventListener('click', async ()=>{
     const msg=$('#clientInsightMsg');
@@ -3426,12 +3507,65 @@ function closeDrawer(){
 }
 
 /* ==================== 영업 기회 ==================== */
+let OPP_ORDERER_ONLY=false;
+/* ---------- 매년 반복되는 거래처 ----------
+   큰 프로젝트는 보통 해마다 비슷한 시기에 공고가 올라온다. 같은 거래처에서 여러 해에 걸쳐
+   프로젝트 시작 달이 몰려 있으면(±1개월 이내) "매년 반복" 패턴으로 보고, 다음에는 대략
+   언제쯤 공고가 올라올지 미리 예상해서 보여준다 — 나라장터 이력이 2026년치뿐이라
+   실제 계약·매출 이력(2019~2026)을 대신 사용한다. */
+function recurringClients(list){
+  const curY = +String(D.meta.asof||'').slice(0,4) || new Date().getFullYear();
+  const out=[];
+  (list||CL).forEach(c=>{
+    const ps=(projOf[c.id]||[]).filter(p=>p[3]);
+    if(ps.length<2) return;
+    const byYear={};
+    ps.forEach(p=>{
+      const y=+String(p[3]).slice(0,4), m=+String(p[3]).slice(5,7);
+      if(!y||!m) return;
+      const rev=p[4]||0;
+      if(!byYear[y] || rev>byYear[y].rev) byYear[y]={m,rev,title:p[2]||''};
+    });
+    const years=Object.keys(byYear).map(Number).sort((a,b)=>a-b);
+    if(years.length<2) return;
+    const mdist=(a,b)=>{ const d=Math.abs(a-b); return Math.min(d,12-d); };
+    /* 시작 달이 ±1개월 이내로 몰린 연도끼리 묶고, 가장 큰 묶음을 그 거래처의 패턴으로 본다 */
+    const groups=[];
+    years.forEach(y=>{
+      const m=byYear[y].m;
+      let g=groups.find(gr=>mdist(gr.months[gr.months.length-1],m)<=1);
+      if(!g){ g={months:[m], years:[y]}; groups.push(g); }
+      else { g.months.push(m); g.years.push(y); }
+    });
+    groups.sort((a,b)=>b.years.length-a.years.length || b.years[b.years.length-1]-a.years[a.years.length-1]);
+    const best=groups[0];
+    if(best.years.length<2) return;
+    let avgMonth=Math.round(best.months.reduce((s,m)=>s+m,0)/best.months.length)||best.months[best.months.length-1];
+    avgMonth=((avgMonth-1)%12+12)%12+1;
+    const totalRev=best.years.reduce((s,y)=>s+(byYear[y].rev||0),0);
+    const lastY=best.years[best.years.length-1];
+    let expectYear=lastY+1;
+    if(expectYear<curY) expectYear=curY; /* 패턴이 끊긴 지 오래면 일단 올해로 예상 */
+    out.push({c, years:best.years, month:avgMonth, rev:totalRev, expectYear});
+  });
+  out.sort((a,b)=> b.years.length-a.years.length || b.rev-a.rev);
+  return out;
+}
+function recurCard(rows){
+  return '<div class="card"><h3>매년 반복되는 거래처 <span style="color:var(--muted-c);font-weight:400">'+rows.length+'곳</span></h3>'+
+    '<p class="sub">여러 해에 걸쳐 프로젝트 시작 달이 몰려 있는 곳 · 다음 예상 시기가 가까운 순 · 나라장터 공고 이력이 아직 2026년치뿐이라 실제 계약 이력으로 추정</p>'+
+    (rows.length?'<div class="plist">'+rows.slice(0,20).map(r=>'<div class="pitem click" data-go="'+esc(r.c.id)+'">'+
+      '<div><div class="pn">'+esc(r.c.n)+ordererBadge(r.c)+'</div><div class="pm"><span>'+esc(r.c.sg)+'</span>'+
+      '<span>'+r.years.join(', ')+'년 '+r.month+'월 시작</span></div></div>'+
+      '<div class="pv">'+r.expectYear+'년 '+r.month+'월경 예상</div></div>').join('')+'</div>'
+      :'<div class="empty">해당 조건의 거래처가 없습니다.</div>')+'</div>';
+}
 function oppCard(title,sub,rows,colFn,jump){
   const id='opp'+Math.random().toString(36).slice(2,8);
   return '<div class="card"><h3>'+title+' <span style="color:var(--muted-c);font-weight:400">'+rows.length+'곳</span></h3>'+
     '<p class="sub">'+sub+'</p>'+
     (rows.length?'<div class="plist">'+rows.slice(0,20).map(c=>'<div class="pitem click" data-go="'+esc(c.id)+'">'+
-      '<div><div class="pn">'+esc(c.n)+'</div><div class="pm"><span>'+esc(c.sg)+'</span>'+
+      '<div><div class="pn">'+esc(c.n)+ordererBadge(c)+'</div><div class="pm"><span>'+esc(c.sg)+'</span>'+
       (c.pm.length?'<span>PM '+esc(c.pm[0][0])+'</span>':'')+
       (c.fd.length?'<span>'+esc(c.fd[0][0])+'</span>':'')+'<span>'+ago(c.mo)+'</span></div></div>'+
       '<div class="pv">'+colFn(c)+'</div></div>').join('')+'</div>'+
@@ -3439,14 +3573,16 @@ function oppCard(title,sub,rows,colFn,jump){
       :'<div class="empty">해당 조건의 거래처가 없습니다.</div>')+'</div>';
 }
 function renderOpp(){
-  const react=CL.filter(c=>c.st==='재활성화 후보').sort((a,b)=>b.t-a.t);
-  const sleep=CL.filter(c=>c.st==='휴면'&&c.t>=5e8).sort((a,b)=>b.t-a.t);
-  const grow=CL.filter(c=>c.r3>c.p3&&c.p3>0).sort((a,b)=>(b.r3-b.p3)-(a.r3-a.p3));
-  const drop=CL.filter(c=>c.p3>0&&c.r3<c.p3*0.7&&c.mo<=24).sort((a,b)=>(b.p3-b.r3)-(a.p3-a.r3));
-  const fresh=CL.filter(c=>c.fy>=2025).sort((a,b)=>b.t-a.t);
-  const cross=CL.filter(c=>c.fd.length===1&&c.t>=3e8&&c.mo<=18).sort((a,b)=>b.t-a.t);
+  /* "발주처만 보기"를 켜면 하청·중개업체로 분류된 곳은 모든 영업 기회 목록에서 제외한다 */
+  const oppCL = OPP_ORDERER_ONLY ? CL.filter(c=>c.ordSt==='orderer') : CL;
+  const react=oppCL.filter(c=>c.st==='재활성화 후보').sort((a,b)=>b.t-a.t);
+  const sleep=oppCL.filter(c=>c.st==='휴면'&&c.t>=5e8).sort((a,b)=>b.t-a.t);
+  const grow=oppCL.filter(c=>c.r3>c.p3&&c.p3>0).sort((a,b)=>(b.r3-b.p3)-(a.r3-a.p3));
+  const drop=oppCL.filter(c=>c.p3>0&&c.r3<c.p3*0.7&&c.mo<=24).sort((a,b)=>(b.p3-b.r3)-(a.p3-a.r3));
+  const fresh=oppCL.filter(c=>c.fy>=2025).sort((a,b)=>b.t-a.t);
+  const cross=oppCL.filter(c=>c.fd.length===1&&c.t>=3e8&&c.mo<=18).sort((a,b)=>b.t-a.t);
   /* ---- 인사이트 지표 ---- */
-  const reactRev=react.reduce((s,c)=>s+c.t,0), sleepAll=CL.filter(c=>c.st==='휴면');
+  const reactRev=react.reduce((s,c)=>s+c.t,0), sleepAll=oppCL.filter(c=>c.st==='휴면');
   const sleepRev=sleepAll.reduce((s,c)=>s+c.t,0);
   const growSum=grow.reduce((s,c)=>s+(c.r3-c.p3),0), dropSum=drop.reduce((s,c)=>s+(c.p3-c.r3),0);
   const oppKpiList=[
@@ -3567,7 +3703,8 @@ function renderOpp(){
     oppCard('신규 진입 거래처','2025년 이후 첫 거래 · 두 번째 과제로 이어가야 하는 곳',
       fresh, c=>'누적 '+won(c.t), '신규 진입')+
     oppCard('교차판매 후보','최근 18개월 안에 거래가 있지만 교육 분야가 한 가지뿐이고 누적 3억원 이상 · 다른 분야 제안 여지',
-      cross, c=>'누적 '+won(c.t), null);
+      cross, c=>'누적 '+won(c.t), null)+
+    recurCard(recurringClients(oppCL));
   g.querySelectorAll('[data-go]').forEach(n=>n.addEventListener('click',()=>openClient(n.dataset.go)));
   g.querySelectorAll('[data-jump]').forEach(n=>n.addEventListener('click',()=>goClient({state:n.dataset.jump})));
 }
@@ -3758,8 +3895,7 @@ function openInst(idx){
    처음 쓰는 사람이 이 보드를 어떻게 다뤄야 할지 막막하지 않도록 만든 것이라
    문구는 최대한 쉽게 씁니다.
    "처음이라면" 흐름은 "지금 뭘 하려고 하나"를 먼저 묻고 그 목적에 맞는 곳으로 바로
-   데려가는 데 집중합니다 — 탭을 훑는 순서는 요약 인사이트의 「읽는 순서」 카드가
-   이미 보여주고 있어서, 여기서 그걸 다시 나열하지 않고 그 카드로 안내만 합니다. */
+   데려가는 데 집중합니다 — 탭을 훑는 순서가 궁금하면 goal_all 노드가 바로 안내합니다. */
 const CHAT_NODES={
   root:{
     bot:'<p>안녕하세요! <b>KMA 거래처 인사이트 보드</b> 사용을 도와드릴게요.</p><p>궁금한 걸 아래에서 골라주세요.</p>',
@@ -3775,7 +3911,7 @@ const CHAT_NODES={
     ]
   },
   what:{
-    bot:'<p>이 보드는 2019~2026년 KMA 실적 데이터를 바탕으로 <b>거래처 현황</b>·<b>영업 기회</b>·<b>강사 정보</b>를 한 곳에서 보여주는 <b>사내 전용</b> 대시보드예요.</p>'+
+    bot:'<p>이 보드는 2019~2026년 KMA 실적 데이터를 바탕으로 <b>거래처 현황</b>·<b>영업 기회</b>·<b>강사 정보</b>를 한 곳에서 보여주는, <b>사내 구성원을 위해 만든</b> 대시보드예요.<br>다만 외부에 링크를 알리지 않았을 뿐, 접속 자체를 막는 별도 보안 장치는 없어요 — 자세한 내용은 \'로그인이 안전한가요?\' 항목을 참고하세요.</p>'+
       '<p>매출·거래 상태 같은 숫자는 원본 데이터에서 그대로 계산한 값이고, 교육 분야·강사 분류처럼 <b>이름에서 추정한 값</b>도 섞여 있어요. 어떤 게 추정인지는 화면에 표시돼요.</p>',
     quick:[{t:'지금 뭐부터 하면 될까요?', to:'start'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
@@ -3800,9 +3936,9 @@ const CHAT_NODES={
     quick:[{t:'거래처 찾기로 이동', go:'p-client'},{t:'내 거래처 더 알아보기', to:'fav'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_react:{
-    bot:'<p><b>요약 인사이트</b> 탭 맨 위의 <b>이번 주 우선 접촉 리스트</b>가 가장 빠른 지름길이에요 — 재활성화 후보와 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳만 골라 보여줘요.</p>'+
-      '<p>전체 명단이 필요하면 <b>영업 기회</b> 탭의 <b>재활성화 후보</b> 카드를 보세요(마지막 거래로부터 19~36개월 지난 곳 전체). 어느 쪽이든 거래처를 누르면 왜 뽑혔는지 계산 근거가 함께 나와요. 다만 명단은 수행 이력만으로 뽑힌 것이니, 접촉 전에 담당 PM에게 먼저 확인하세요.</p>',
-    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'영업 기회로 이동', go:'p-opp'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+    bot:'<p><b>영업 기회</b> 탭 맨 위의 <b>이번 주 우선 접촉 리스트</b>가 가장 빠른 지름길이에요.<br>재활성화 후보와 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳만 골라 보여줘요.</p>'+
+      '<p>전체 명단이 필요하면 같은 탭의 <b>재활성화 후보</b> 카드를 보세요(마지막 거래로부터 19~36개월 지난 곳 전체). 어느 쪽이든 거래처를 누르면 왜 뽑혔는지 계산 근거가 함께 나와요. 다만 명단은 수행 이력만으로 뽑힌 것이니, 접촉 전에 담당 PM에게 먼저 확인하세요.</p>',
+    quick:[{t:'영업 기회로 이동', go:'p-opp'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_num:{
     bot:'<p>요약 카드나 그래프를 누르면 바로 위에 <b>근거 배너</b>가 뜨고, 어떤 숫자를 어떻게 계산했는지 식으로 보여줘요.</p>'+
@@ -3810,22 +3946,22 @@ const CHAT_NODES={
     quick:[{t:'데이터 기준으로 이동', go:'p-note'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_review:{
-    bot:'<p><b>요약 인사이트</b> 탭의 <b>리뷰 요청이 필요한 거래처</b> 카드가 이 용도예요. 마지막 거래로부터 2~12개월 지났는데 아직 리뷰가 하나도 없는 곳을, 누적 매출이 큰 순서로 최대 10곳 보여줘요.</p>'+
+    bot:'<p><b>영업 기회</b> 탭의 <b>리뷰 요청이 필요한 거래처</b> 카드가 이 용도예요. 마지막 거래로부터 2~12개월 지났는데 아직 리뷰가 하나도 없는 곳을,<br>누적 매출이 큰 순서로 최대 10곳 보여줘요.</p>'+
       '<p>목록에서 거래처를 누르면 상세 화면으로 이동하면서 리뷰 작성 칸이 바로 펼쳐지고 그 위치로 스크롤돼요.</p>',
-    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+    quick:[{t:'영업 기회로 이동', go:'p-opp'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_g2b:{
-    bot:'<p><b>요약 인사이트</b> 탭의 <b>나라장터 마감 임박 공고</b> 카드에서 마감까지 3일 이내 남은 공고만 모아 보여줘요. 누르면 해당 거래처 상세 화면으로 바로 이동해요.</p>'+
-      '<p>발주기관명이 거래처명과 <b>정확히 일치</b>하는 공고만 자동으로 연결돼요 — 표기가 비슷하기만 한 건 잘못 붙일 위험이 있어 일부러 자동 연결하지 않아요. 눈여겨볼 공고는 각 거래처 상세의 나라장터 목록에서 별(★)로 따로 저장해 둘 수 있어요.</p>',
-    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+    bot:'<p><b>영업 기회</b> 탭의 <b>나라장터 마감 임박 공고</b> 카드에서 마감까지 3일 이내 남은 공고만 모아 보여줘요. 누르면 해당 거래처 상세 화면으로 바로 이동해요.</p>'+
+      '<p>발주기관명이 거래처명과 <b>정확히 일치</b>하는 공고만 자동으로 연결돼요.<br>표기가 비슷하기만 한 건 잘못 붙일 위험이 있어 일부러 자동 연결하지 않아요. 눈여겨볼 공고는 각 거래처 상세의 나라장터 목록에서 별(★)로 따로 저장해 둘 수 있어요.</p>',
+    quick:[{t:'영업 기회로 이동', go:'p-opp'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_inst:{
     bot:'<p><b>강사 풀</b> 탭에서 이름·분야·소속으로 검색할 수 있어요. 행을 누르면 상세 정보가 열려요.</p>',
     quick:[{t:'강사 풀로 이동', go:'p-inst'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   goal_all:{
-    bot:'<p><b>요약 인사이트</b> 탭 맨 위에 「읽는 순서」 카드가 있어요. 탭 6개를 어떤 차례로 보면 좋은지 거기 정리돼 있으니 그대로 따라가 보세요.</p>',
-    quick:[{t:'요약 인사이트로 이동', go:'p-sum'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
+    bot:'<p>이 순서로 보시면 흐름이 잘 이어져요: <b>전사 현황</b>(규모와 추세) → <b>거래처 찾기</b>(조건으로 한 곳 파악) → <b>영업 기회</b>(접촉할 곳 고르기) → <b>강사 풀</b>(분야별 강사 확인) → <b>데이터 기준</b>(인용 전 확인).</p>',
+    quick:[{t:'전사 현황으로 이동', go:'p-over'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   tabs:{
     bot:'<p>탭은 모두 6개예요. 자세히 볼 탭을 골라주세요.</p>',
@@ -3839,16 +3975,16 @@ const CHAT_NODES={
     quick:[{t:'이동하기', go:'p-sum'},{t:'다른 탭 보기', to:'tabs'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]},
   tab_over:{bot:'<p><b>전사 현황</b> — 연도별 매출 추이와 기관 유형·교육 분야·사업부문별 구성을 봐요. 연도 막대를 누르면 그 해 상위 거래처 목록이 바로 아래에 열려요.</p>',
     quick:[{t:'이동하기', go:'p-over'},{t:'다른 탭 보기', to:'tabs'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]},
-  tab_client:{bot:'<p><b>거래처 찾기</b> — 이름·담당 PM·교육 분야·기관 유형·사업부문으로 검색하고, 거래처를 눌러 상세(연도별 매출, 프로젝트 이력, 의견)를 볼 수 있어요.</p>',
+  tab_client:{bot:'<p><b>거래처 찾기</b> — 이름·담당 PM·교육 분야·기관 유형·사업부문으로 검색할 수 있어요.<br>거래처를 누르면 상세(연도별 매출, 프로젝트 이력, 의견)가 열려요.</p>',
     quick:[{t:'이동하기', go:'p-client'},{t:'다른 탭 보기', to:'tabs'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]},
-  tab_opp:{bot:'<p><b>영업 기회</b> — 매출이 늘거나 준 거래처, 오래 거래가 끊긴 재활성화 후보를 우선순위 목록으로 보여줘요.</p>',
+  tab_opp:{bot:'<p><b>영업 기회</b> — 맨 위에 <b>이번 주 우선 접촉 리스트</b>·<b>리뷰 요청이 필요한 거래처</b>·<b>나라장터 마감 임박 공고</b>를 바로 실행할 수 있는 카드로 보여줘요.<br>그 아래에는 매출이 늘거나 준 거래처, 오래 거래가 끊긴 재활성화 후보가 우선순위 목록으로 나와요.</p>',
     quick:[{t:'이동하기', go:'p-opp'},{t:'다른 탭 보기', to:'tabs'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]},
   tab_inst:{bot:'<p><b>강사 풀</b> — 강사 3,800여 명을 분야·경력·소속으로 찾아봐요. 행을 누르면 상세 팝업이 열려요.</p>',
     quick:[{t:'이동하기', go:'p-inst'},{t:'다른 탭 보기', to:'tabs'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]},
   tab_note:{bot:'<p><b>데이터 기준</b> — 회계연도 기준, 2026년은 8월까지라는 점, 교육 분야는 추정값이라는 점, 거래처 상태 판정 순서 같은 걸 그림으로 정리해 뒀어요. 숫자가 헷갈릴 때 가장 먼저 볼 곳이에요.</p>',
     quick:[{t:'이동하기', go:'p-note'},{t:'다른 탭 보기', to:'tabs'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]},
   fav:{
-    bot:'<p>거래처 표의 <b>별(★)</b>을 누르면 내 거래처로 등록돼요. <b>이 브라우저에만</b> 저장되고 새로고침해도 유지되지만, 다른 사람이나 다른 기기에는 보이지 않아요.</p>'+
+    bot:'<p>거래처 표의 <b>별(★)</b>을 누르면 내 거래처로 등록돼요. <b>로그인한 계정마다 따로</b> 저장되고 새로고침해도 유지되지만, 다른 계정이나 다른 기기에는 보이지 않아요.</p>'+
       '<p>상단바의 <b>★ 내 거래처</b> 칩을 누르면 내 거래처로 담아둔 곳만 걸러서 볼 수 있어요.</p>',
     quick:[{t:'내 거래처 보기', act:'fav'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
@@ -3863,12 +3999,12 @@ const CHAT_NODES={
     quick:[{t:'강사 풀로 이동', go:'p-inst'},{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   ask:{
-    bot:'<p>화면 어디서든 <b>문의하기</b> 버튼으로 등록할 수 있어요. 유형을 먼저 고르면 자주 묻는 답을 바로 보여주고, 등록하면 지금 보던 화면·필터 정보가 자동으로 같이 담겨요.</p>',
+    bot:'<p>화면 어디서든 <b>문의하기</b> 버튼으로 등록할 수 있어요. 유형을 먼저 고르면 자주 묻는 답을 바로 보여줘요.<br>등록하면 지금 보던 화면·필터 정보가 자동으로 같이 담겨요.</p>',
     quick:[{t:'문의하기 열기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
   login:{
-    bot:'<p>로그인은 <b>화면 가림막일 뿐 진짜 보안 장치는 아니에요.</b> 부서별 계정으로 나뉘어 있지만, 이건 즐겨찾기 같은 조회 화면을 사람별로 구분해 두려는 목적일 뿐이고, 데이터 자체는 로그인 여부와 상관없이 항상 조회 가능한 구조예요.</p>'+
-      '<p>계정(아이디·비밀번호)은 이 화면 안이 아니라 별도로 안전하게 보관되어 있어요 — 잊어버렸거나 새 계정이 필요하면 담당자에게 문의해 주세요. 이 보드 자체도 <b>사내 전용</b>이라 외부에 공개 공유되지 않아요.</p>',
+    bot:'<p>로그인은 <b>화면 가림막일 뿐 진짜 보안 장치는 아니에요.</b> 부서별 계정으로 나뉘어 있지만, 이건 즐겨찾기 같은 조회 화면을 사람별로 구분해 두려는 목적일 뿐이에요.<br>데이터 자체는 로그인 여부와 상관없이 항상 조회 가능한 구조예요.</p>'+
+      '<p>계정(아이디·비밀번호)은 이 화면 안이 아니라 별도로 안전하게 보관되어 있어요.<br>잊어버렸거나 새 계정이 필요하면 담당자에게 문의해 주세요.<br>이 보드 링크 자체를 외부에 공개하지는 않았지만, <b>링크와 이 화면의 기술적 접속 정보를 아는 사람이라면 로그인 여부와 상관없이 데이터를 그대로 볼 수 있는 구조</b>라는 점은 감안해 주세요.</p>',
     quick:[{t:'해결 안 됐어요 → 문의하기', act:'ask'},{t:'메인 메뉴', to:'root'}]
   },
 };
@@ -3921,17 +4057,76 @@ function chatPick(o){
     });
   }
 }
+/* ---- 자유 입력 질문(AI Q&A) + 계정별 대화 기록 ----
+   기존 시나리오 버튼 메뉴는 그대로 두고, 그 아래 입력창을 하나 추가해 자유 질문도
+   받을 수 있게 한다. Supabase Edge Function(chat-ask)이 실제 거래처·프로젝트
+   데이터를 참고해 답하고, 질문·답변을 계정별로 저장해 로그아웃 후 다시 로그인해도
+   지난 대화를 이어볼 수 있게 한다. */
+let chatHistLoaded=false;
+async function chatLoadHistory(){
+  if(chatHistLoaded) return; chatHistLoaded=true;
+  try{
+    const rows=await sbSelect('chat_messages?account_id=eq.'+encodeURIComponent(curAcctId())+'&select=role,content,created_at&order=created_at.desc&limit=10');
+    if(rows && rows.length){
+      const chron=rows.slice().reverse();
+      const lbl=el('div','chist-lbl','\uc9c0\ub09c \ub300\ud654(\uc774 \uacc4\uc815)');
+      $('#chatBody').appendChild(lbl);
+      chron.forEach(m=>{ chatMsg(m.role==='user'?'me':'bot', esc(m.content).replace(/\n/g,'<br>')); });
+      const end=el('div','chist-end','<hr>');
+      $('#chatBody').appendChild(end);
+    }
+  }catch(e){ /* \uc9c0\ub09c \ub300\ud654\ub97c \ubabb \ubd88\ub7ec\uc640\ub3c4 \uc0c8 \ub300\ud654\ub294 \uadf8\ub300\ub85c \uac00\ub2a5\ud574\uc57c \ud55c */ }
+}
+let chatAsking=false;
+async function chatAskFree(question){
+  question=(question||'').trim();
+  if(!question || chatAsking) return;
+  chatAsking=true;
+  const oldq=$('#chatBody .cquick'); if(oldq) oldq.remove();
+  chatMsg('me', esc(question));
+  const body=$('#chatBody');
+  const row=el('div'); row.className='crow bot ctyping';
+  row.innerHTML='<span class="cav">'+CHAT_ICON+'</span><div class="cb"><i></i><i></i><i></i></div>';
+  body.appendChild(row); body.scrollTop=body.scrollHeight;
+  const btn=$('#chatSendBtn'); if(btn) btn.disabled=true;
+  try{
+    const r=await fetch(CHAT_ASK_FN_URL,{method:'POST',headers:sbHeaders(),body:JSON.stringify({question:question, account_id:curAcctId()})});
+    const j=await r.json().catch(()=>({}));
+    row.remove();
+    if(j && j.answer){
+      chatMsg('bot', esc(j.answer).replace(/\n/g,'<br>'));
+    }else{
+      chatMsg('bot','<p>\uc9c0\uae08\uc740 \ub2f5\ubcc0\uc744 \uac00\uc838\uc624\uc9c0 \ubabb\ud588\uc5b4\uc694. \ubb38\uc758\ud558\uae30\ub85c \ub0a8\uaca8\uc8fc\uc2dc\uba74 \uc0ac\ub78c\uc774 \ud655\uc778\ud560\uac8c\uc694.</p>');
+    }
+    chatQuick([{t:'\ubb38\uc758\ud558\uae30 \uc5f4\uae30', act:'ask'},{t:'\uba54\uc778 \uba54\ub274', to:'root'}]);
+  }catch(e){
+    row.remove();
+    chatMsg('bot','<p>\uc9c0\uae08\uc740 \ub2f5\ubcc0\uc744 \uac00\uc838\uc624\uc9c0 \ubabb\ud588\uc5b4\uc694(\uc5f0\uacb0 \ubb38\uc81c). \ubb38\uc758\ud558\uae30\ub85c \ub0a8\uaca8\uc8fc\uc2dc\uba74 \uc0ac\ub78c\uc774 \ud655\uc778\ud560\uac8c\uc694.</p>');
+    chatQuick([{t:'\ubb38\uc758\ud558\uae30 \uc5f4\uae30', act:'ask'},{t:'\uba54\uc778 \uba54\ub274', to:'root'}]);
+  }finally{
+    chatAsking=false;
+    if(btn) btn.disabled=false;
+  }
+}
 function initChat(){
   const btn=$('#chatBtn'), panel=$('#chatPanel');
   let opened=false;
   const open=()=>{
     panel.hidden=false; btn.setAttribute('aria-expanded','true');
-    if(!opened){ opened=true; chatShow('root'); }
+    if(!opened){ opened=true; chatLoadHistory().then(()=>chatShow('root')); }
   };
   const close=()=>{ panel.hidden=true; btn.setAttribute('aria-expanded','false'); };
   btn.addEventListener('click',()=>{ panel.hidden ? open() : close(); });
   $('#chatClose').addEventListener('click',close);
   document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !panel.hidden) close(); });
+  const freeForm=$('#chatInputForm'), freeInput=$('#chatFreeInput');
+  if(freeForm && freeInput){
+    freeForm.addEventListener('submit',e=>{
+      e.preventDefault();
+      const q=freeInput.value; freeInput.value='';
+      chatAskFree(q);
+    });
+  }
 }
 
 /* ==================== 저장소 (의견 · 문의) ==================== */
@@ -3941,23 +4136,37 @@ let opFormOpen=false;
 let G2BALL=[], G2BCOUNT={};
 let ASKALL=[], askBoxOpen=false;
 const TAGS=['의사결정 빠름','재구매 의향 있음','요구사항 많음','일정 촉박','정산·대금 지연','담당자 교체 잦음','유의 필요'];
+/* ---------- 리뷰 태그 빈도 칩 (2026-09-24, 인사이트 가독성 개선) ----------
+   아마존 "Customers say"의 클릭 가능한 키워드 태그처럼, 리뷰마다 실제로 남긴 태그를
+   빈도순으로 짧은 칩으로 보여준다. AI가 문장으로 요약하기 전에 실제 데이터(사람이 직접
+   고른 태그)부터 한눈에 보이게 해서, 긴 글을 안 읽어도 핵심이 먼저 잡히게 한다. */
+const RISK_TAGS=new Set(['요구사항 많음','일정 촉박','정산·대금 지연','담당자 교체 잦음','유의 필요']);
+function tagFreqHTML(reviewsArr, limit){
+  const freq={};
+  (reviewsArr||[]).forEach(o=>{ (o.tags||[]).forEach(t=>{ freq[t]=(freq[t]||0)+1; }); });
+  const rows=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0, limit||6);
+  if(!rows.length) return '';
+  return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+
+    rows.map(([t,n])=>'<span class="tag'+(RISK_TAGS.has(t)?' wn':'')+'">'+esc(t)+' <b>×'+n+'</b></span>').join('')+
+    '</div>';
+}
 const WHOKEY='kma-insight-who';
-/* "내가 쓴 글"은 이 브라우저에만 기억됩니다. 보드에는 누가 썼는지 남기지 않으므로
+/* "내가 쓴 글"은 이 브라우저의 이 계정에만 기억됩니다(계정마다 따로). 보드에는 누가 썼는지 남기지 않으므로
    (익명 글도 있으니) 서버 쪽으로는 본인 확인을 할 방법이 없습니다.
-   다른 PC에서 접속하거나 브라우저 기록을 지우면 삭제 버튼은 사라집니다. */
+   다른 계정·다른 PC에서 접속하거나 브라우저 기록을 지우면 삭제 버튼은 사라집니다. */
 const MINEKEY='kma-insight-mine';
-function mine(){ try{ const m=JSON.parse(localStorage.getItem(MINEKEY)||'{}'); return {op:m.op||[], ask:m.ask||[]}; }catch(e){ return {op:[], ask:[]}; } }
+function mine(){ try{ const m=JSON.parse(localStorage.getItem(acctKey(MINEKEY))||'{}'); return {op:m.op||[], ask:m.ask||[]}; }catch(e){ return {op:[], ask:[]}; } }
 function markMine(kind,id){ if(!id) return; const m=mine(); m[kind]=[id].concat(m[kind]).slice(0,500);
-  try{ localStorage.setItem(MINEKEY, JSON.stringify(m)); }catch(e){} }
+  try{ localStorage.setItem(acctKey(MINEKEY), JSON.stringify(m)); }catch(e){} }
 function unmarkMine(kind,id){ const m=mine(); m[kind]=m[kind].filter(x=>x!==id);
-  try{ localStorage.setItem(MINEKEY, JSON.stringify(m)); }catch(e){} }
+  try{ localStorage.setItem(acctKey(MINEKEY), JSON.stringify(m)); }catch(e){} }
 function isMine(kind,id){ return mine()[kind].indexOf(id)>=0; }
 /* 내가 등록한 문의에 답변이 달렸는지 — 이 브라우저 기준으로 "이미 봤음"을 기억해 배지를 띄운다 */
 const SEENREPLYKEY='kma-insight-seenReplies';
-function seenReplies(){ try{ return new Set(JSON.parse(localStorage.getItem(SEENREPLYKEY)||'[]')); }catch(e){ return new Set(); } }
+function seenReplies(){ try{ return new Set(JSON.parse(localStorage.getItem(acctKey(SEENREPLYKEY))||'[]')); }catch(e){ return new Set(); } }
 function markReplySeen(id){
   const s=seenReplies(); s.add(id);
-  try{ localStorage.setItem(SEENREPLYKEY, JSON.stringify(Array.from(s).slice(-1000))); }catch(e){}
+  try{ localStorage.setItem(acctKey(SEENREPLYKEY), JSON.stringify(Array.from(s).slice(-1000))); }catch(e){}
 }
 function unseenReplyCount(){
   const seen=seenReplies();
@@ -3979,8 +4188,8 @@ function renderAskBadge(){
     b.title=n+'건의 문의에 새 답변이 달렸습니다';
   } else if(b){ b.remove(); }
 }
-function who(){ try{ return JSON.parse(localStorage.getItem(WHOKEY)||'{}'); }catch(e){ return {}; } }
-function saveWho(o){ try{ localStorage.setItem(WHOKEY, JSON.stringify(o)); }catch(e){} }
+function who(){ try{ return JSON.parse(localStorage.getItem(acctKey(WHOKEY))||'{}'); }catch(e){ return {}; } }
+function saveWho(o){ try{ localStorage.setItem(acctKey(WHOKEY), JSON.stringify(o)); }catch(e){} }
 function fmtTs(ts){
   const d=new Date(ts||0); if(!ts||isNaN(d)) return '';
   const p=n=>String(n).padStart(2,'0');
@@ -3998,6 +4207,8 @@ function fmtTs(ts){
 const SUPABASE_URL='https://tzfmbowywckfqgseibvh.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_a4aXa_dIW5RQG2rdcZBlfQ_NkK9V23V';
 const SUPABASE_FN_URL=SUPABASE_URL+'/functions/v1/generate-insight';
+const CHAT_ASK_FN_URL=SUPABASE_URL+'/functions/v1/chat-ask';
+const CLIENT_NEWS_FN_URL=SUPABASE_URL+'/functions/v1/client-news';
 function sbHeaders(extra){
   return Object.assign({apikey:SUPABASE_ANON_KEY, Authorization:'Bearer '+SUPABASE_ANON_KEY, 'Content-Type':'application/json'}, extra||{});
 }
@@ -4032,7 +4243,7 @@ async function loadInquiries(){
   renderAskBadge();
 }
 let REVIEWS=[], REVIEWSREADY=false;
-/* ---------- 리뷰 요청이 필요한 거래처 (요약 인사이트 탭, AI 인사이트 카드 아래) ----------
+/* ---------- 리뷰 요청이 필요한 거래처 (영업 기회 탭 · 2026-09-23 요약 인사이트에서 이동) ----------
    "프로젝트 마지막 거래로부터 N개월 뒤" 리뷰를 요청하자는 방향으로, 이미 재활성화
    후보(19개월부터)로 넘어가기 전 구간(2~12개월)만 본다 — 그 뒤는 재활성화 후보
    목록이 이미 다루는 영역이라 겹치지 않게 나눔. 외부 알림은 없고 보드 안에서만
@@ -4126,11 +4337,17 @@ function formatInsightHtml(text){
 async function renderAiInsight(){
   const body=$('#aiInsightBody'); if(!body) return;
   try{
-    const rows=await sbSelect('insights?company_name=eq.__ALL__&select=insight_text,review_count,updated_at&limit=1');
+    const [rows, allTags]=await Promise.all([
+      sbSelect('insights?company_name=eq.__ALL__&select=insight_text,review_count,updated_at&limit=1'),
+      sbSelect('reviews?select=tags').catch(()=>[])
+    ]);
     const row=rows&&rows[0];
+    const tagsHtml=tagFreqHTML(allTags, 8);
     if(row&&row.insight_text){
-      body.innerHTML=formatInsightHtml(row.insight_text)+
+      body.innerHTML=tagsHtml+formatInsightHtml(row.insight_text)+
         '<p class="formhint" style="margin-top:10px">리뷰 '+cnt(row.review_count||0)+'건 기준 · '+esc(fmtTs(row.updated_at))+' 생성</p>';
+    } else if(tagsHtml){
+      body.innerHTML=tagsHtml+'<p class="formhint">아직 생성된 인사이트가 없습니다. 리뷰가 쌓인 뒤 아래 "다시 생성"을 눌러보세요.</p>';
     } else {
       body.innerHTML='<p class="formhint">아직 생성된 인사이트가 없습니다. 리뷰가 쌓인 뒤 아래 "다시 생성"을 눌러보세요.</p>';
     }
@@ -4141,16 +4358,47 @@ async function renderAiInsight(){
 async function renderClientInsight(c){
   const body=$('#clientInsightBody'); if(!body) return;
   try{
-    const rows=await sbSelect('insights?company_name=eq.'+encodeURIComponent(c.n)+'&select=insight_text,review_count,updated_at&limit=1');
+    /* REVIEWS 전역 변수는 mountOpinions()가 비동기로 채우는 중이라 아직 이전 거래처
+       것일 수 있다 — 경쟁 상태를 피하려고 이 거래처 리뷰의 태그만 따로 가볍게 조회한다 */
+    const [rows, cTags]=await Promise.all([
+      sbSelect('insights?company_name=eq.'+encodeURIComponent(c.n)+'&select=insight_text,review_count,updated_at&limit=1'),
+      sbSelect('reviews?company_name=eq.'+encodeURIComponent(c.n)+'&select=tags').catch(()=>[])
+    ]);
     const row=rows&&rows[0];
+    const tagsHtml=tagFreqHTML(cTags, 6);
     if(row&&row.insight_text){
-      body.innerHTML=formatInsightHtml(row.insight_text)+
+      body.innerHTML=tagsHtml+formatInsightHtml(row.insight_text)+
         '<p class="formhint" style="margin-top:10px">리뷰 '+cnt(row.review_count||0)+'건 기준 · '+esc(fmtTs(row.updated_at))+' 생성</p>';
+    } else if(tagsHtml){
+      body.innerHTML=tagsHtml+'<p class="formhint">이 거래처에 대한 인사이트가 아직 없습니다. 리뷰가 등록된 뒤 위 "다시 생성"을 눌러보세요.</p>';
     } else {
       body.innerHTML='<p class="formhint">이 거래처에 대한 인사이트가 아직 없습니다. 리뷰가 등록된 뒤 위 "다시 생성"을 눌러보세요.</p>';
     }
   }catch(e){
     body.innerHTML='<p class="formhint">인사이트를 불러오지 못했습니다 — <b>'+esc(e&&e.message||String(e))+'</b></p>';
+  }
+}
+async function renderClientNews(c){
+  const body=$('#clientNewsBody'); if(!body) return;
+  try{
+    const r=await fetch(CLIENT_NEWS_FN_URL,{method:'POST',headers:sbHeaders(),body:JSON.stringify({client_name:c.n})});
+    const raw=await r.text();
+    let j={}; try{ j=JSON.parse(raw); }catch(_){ }
+    if(!r.ok || j.error) throw new Error(j.error||raw.slice(0,300));
+    const items=j.items||[];
+    if(!items.length){
+      body.innerHTML='<p class="formhint">관련 뉴스를 찾지 못했습니다.</p>';
+      return;
+    }
+    body.innerHTML='<div class="plist">'+items.map(it=>
+      '<a class="pitem click" href="'+esc(it.link)+'" target="_blank" rel="noopener" style="display:flex;text-decoration:none;color:inherit">'+
+        '<div style="min-width:0"><div class="pn">'+esc(it.title)+'</div>'+
+        '<div class="pm" style="white-space:normal">'+esc(it.description)+'</div>'+
+        '<div class="pm" style="margin-top:4px">'+esc(fmtTs(it.pubDate)||'')+'</div></div>'+
+      '</a>'
+    ).join('')+'</div>';
+  }catch(e){
+    body.innerHTML='<p class="formhint">뉴스를 불러오지 못했습니다 — <b>'+esc(e&&e.message||String(e))+'</b></p>';
   }
 }
 function initAiInsight(){
@@ -4338,7 +4586,7 @@ function renderOpBox(){
    (표기가 비슷하기만 한 것은 오매칭 위험이 있어 자동 연결하지 않는다). 이 화면은 그 결과를
    cid 기준으로 걸러서 마감이 지나지 않은 것만 보여줄 뿐, 나라장터로 직접 요청하지 않는다. */
 /* "나라장터 마감 임박 공고" 카드 — 개발자 제안 중 하나로 추가(2026-09-23).
-   위치는 "요약 인사이트 탭에 카드로"(사용자 선택), 임박 기준은 "3일 이내"(사용자 선택) —
+   위치는 처음엔 요약 인사이트 탭이었으나 2026-09-23 영업 기회 탭으로 이동. 임박 기준은 "3일 이내"(사용자 선택) —
    기존에 목록 화면에서 D-1~D-3/오늘 마감을 강조(.wn 클래스)하던 기준과 동일하게 맞췄다. */
 function renderG2bDeadlineAlerts(){
   const box=$('#g2bDeadlineBody'); if(!box) return;
@@ -4416,7 +4664,19 @@ const G2BALT={
   '케이티':{url:'https://partner.kt.com/', label:'KT 협력사포탈', note:"포탈 안 '입찰' 메뉴에서 진행 중인 입찰을 볼 수 있어요"},
   '현대자동차':{url:'https://winwin23.hyundai.com/', label:'HMG 상생협력실천센터', note:'협력사 지원 플랫폼이라 입찰공고 전용 게시판은 아니에요'},
   '우리은행':{url:'https://epro.wooribank.com/', label:'우리은행 전자구매시스템', note:'구매·입찰 공고를 여기서 확인할 수 있어요'},
-  '에이치디현대중공업':{url:'https://www.hhi.co.kr/Customer/cm05_1', label:'HD현대중공업 공고 게시판', note:'입찰 외 다른 공고도 섞여 있어요'}
+  '에이치디현대중공업':{url:'https://www.hhi.co.kr/Customer/cm05_1', label:'HD현대중공업 공고 게시판', note:'입찰 외 다른 공고도 섞여 있어요'},
+  /* 2026-09-24 추가 — 공공기관 중에서도 나라장터가 아니라 자체(또는 그룹 공통) 전자조달
+     시스템을 쓰는 곳들. 한국남부발전·한국중부발전 홈페이지에 직접 들어가 "입찰안내" 문구를
+     확인해 KEPCO 전력그룹사(한전·발전 5개사)가 전부 같은 SRM을 쓴다는 것을 확인했다.
+     상세 열람에는 업체 등록 + 공동인증서가 필요해 로그인 없이는 목록만 보인다. */
+  '한국전력공사':{url:'https://srm.kepco.net/', label:'한국전력 전자조달시스템(SRM)', note:'전력그룹사(한전·발전 5개사) 공통 조달 시스템이에요 — 업체 등록과 공동인증서가 있어야 상세를 볼 수 있어요'},
+  '한국남부발전':{url:'https://srm.kepco.net/', label:'한국전력 전자조달시스템(SRM)', note:'남부발전 홈페이지도 "입찰은 KEPCO SRM에서 진행"이라고 안내해요 — 업체 등록과 공동인증서가 필요해요'},
+  '한국동서발전':{url:'https://srm.kepco.net/', label:'한국전력 전자조달시스템(SRM)', note:'전력그룹사 공통 조달 시스템이에요 — 업체 등록과 공동인증서가 필요해요'},
+  '한국중부발전':{url:'https://srm.kepco.net/', label:'한국전력 전자조달시스템(SRM)', note:'중부발전 홈페이지도 "입찰은 KEPCO SRM에서 진행"이라고 안내해요 — 업체 등록과 공동인증서가 필요해요'},
+  '한국서부발전':{url:'https://srm.kepco.net/', label:'한국전력 전자조달시스템(SRM)', note:'전력그룹사 공통 조달 시스템이에요 — 업체 등록과 공동인증서가 필요해요'},
+  '한국가스공사':{url:'https://www.kogas.or.kr/site/koGas/referenceBidList.do?Key=1050105000000', label:'한국가스공사 입찰정보', note:'회사 홈페이지 공지사항 게시판에서 확인할 수 있어요'},
+  '국가철도공단':{url:'https://ebid.kr.or.kr/', label:'국가철도공단 전자조달시스템', note:'나라장터가 아닌 자체 시스템이에요 — 상세 열람에는 업체 등록이 필요할 수 있어요'},
+  '한국수자원공사':{url:'https://ebid.kwater.or.kr/', label:'K-water 전자조달시스템', note:'나라장터가 아닌 자체 시스템이에요 — 상세 열람에는 업체 등록이 필요할 수 있어요'}
 };
 function renderG2B(){
   const box=$('#g2bCard'); if(!box||!curClient) return;
@@ -4434,8 +4694,12 @@ function renderG2B(){
       (isPriv
         ? (alt
             ? '<p class="note inset" style="margin-top:0">나라장터(조달청)는 <b>공공기관을 대상으로 하는 입찰 시스템</b>이라, 민간 기업인 이 거래처는 원래부터 나라장터에 올라오지 않습니다. 대신 이 거래처는 자체 채널을 운영하고 있어요 — <a href="'+esc(alt.url)+'" target="_blank" rel="noopener">'+esc(alt.label)+'</a><br><span class="tsub">'+esc(alt.note)+'</span></p>'
-            : '<p class="note inset" style="margin-top:0">나라장터(조달청)는 <b>공공기관을 대상으로 하는 입찰 시스템</b>이라, 민간 기업인 이 거래처는 원래부터 나라장터에 올라오지 않습니다 — 정부기관용 API라 민간 공고 자체가 없습니다. 민간 기업은 회사마다 자체 협력사 포털·홈페이지에 따로 공고를 올리고 이를 한 번에 모아 주는 표준 창구가 없어, 아직 자동으로 연결해 드리지는 못합니다 — <a href="https://www.google.com/search?q='+searchQ+'" target="_blank" rel="noopener">'+esc(curClient.n)+' 협력사 입찰 검색해보기</a></p>')
-        : '<p class="note inset" style="margin-top:0">지금까지 매칭된 나라장터 공고가 없습니다. 발주기관명이 거래처명과 <b>정확히 일치</b>할 때만 자동으로 연결하므로(오매칭 방지), 실제로는 공고가 있어도 발주기관 표기가 달라 놓쳤을 수 있습니다 — <a href="https://www.g2b.go.kr" target="_blank" rel="noopener">나라장터</a>에서 기관명으로 직접 검색해 확인해 보세요.</p>');
+            : '<p class="note inset" style="margin-top:0">나라장터(조달청)는 <b>공공기관을 대상으로 하는 입찰 시스템</b>이라, 민간 기업인 이 거래처는 원래부터 나라장터에 올라오지 않습니다.<br>정부기관용 API라 민간 공고 자체가 없기 때문입니다. 민간 기업은 회사마다 자체 협력사 포털·홈페이지에 따로 공고를 올리는데, 이를 한 번에 모아 주는 표준 창구가 없어 아직 자동으로 연결해 드리지는 못합니다 — <a href="https://www.google.com/search?q='+searchQ+'" target="_blank" rel="noopener">'+esc(curClient.n)+' 협력사 입찰 검색해보기</a></p>')
+        : (alt
+            /* 공공기관이지만 나라장터가 아니라 자체(또는 그룹 공통) 조달 시스템을 쓰는 것으로
+               확인된 곳 — 2026-09-24, 해당 기관 홈페이지를 직접 확인해서 링크를 넣었다 */
+            ? '<p class="note inset" style="margin-top:0">이 거래처는 나라장터가 아니라 <b>자체(또는 그룹 공통) 전자조달 시스템</b>에 공고를 올립니다 — <a href="'+esc(alt.url)+'" target="_blank" rel="noopener">'+esc(alt.label)+'</a><br><span class="tsub">'+esc(alt.note)+'</span></p>'
+            : '<p class="note inset" style="margin-top:0">지금까지 매칭된 나라장터 공고가 없습니다.<br>발주기관명이 거래처명과 <b>정확히 일치</b>할 때만 자동으로 연결하기 때문에(오매칭 방지), 실제로는 공고가 있어도 발주기관 표기가 달라 놓쳤을 수 있어요 — <a href="https://www.g2b.go.kr" target="_blank" rel="noopener">나라장터</a>에서 기관명으로 직접 검색해 확인해 보세요.</p>'));
     return;
   }
   box.innerHTML=
@@ -4460,7 +4724,7 @@ function renderG2bFavModal(){
   const rows=G2BALL.filter(g=>G2BFAV.has(g._id)).map(g=>({g, dday:ddayLabel(g.closeDt)}));
   const open=rows.filter(r=>r.dday).sort((a,b)=>new Date(a.g.closeDt)-new Date(b.g.closeDt));
   const closed=rows.filter(r=>!r.dday).sort((a,b)=>new Date(b.g.closeDt)-new Date(a.g.closeDt));
-  if(sub) sub.textContent = rows.length+'건 저장됨 · 이 브라우저에만 저장됩니다 · 거래처를 넘나들며 모아 봅니다';
+  if(sub) sub.textContent = rows.length+'건 저장됨 · 로그인한 계정마다 따로 저장됩니다 · 거래처를 넘나들며 모아 봅니다';
   if(!rows.length){
     body.innerHTML='<p class="formhint">아직 저장한 공고가 없습니다. 거래처 상세의 나라장터 공고 목록에서 ☆를 눌러 담아보세요.</p>';
     return;
@@ -4792,6 +5056,21 @@ async function exportRows(head, bodyArrs, meta, filename){
       /* 그 외(권한 없음 등)는 복사 모달로 대체 */
     }
   }
+  /* GitHub Pages 등 claude.ai 밖에서는 위 DLNS가 항상 비어 있다(window.claude 자체가 없음) —
+     2026-09-24 발견: 그래서 "엑셀로 다운로드" 버튼을 눌러도 실제로는 파일이 저장되지 않고
+     매번 복사 모달로만 빠지고 있었다. 표준 브라우저 다운로드(Blob + <a download>)로 실제
+     .csv 파일을 내려받게 고침 — 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM을 붙인 CSV를 그대로 쓴다. */
+  try{
+    const blob=new Blob([toCSV(head, bodyArrs)], {type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=(filename||'조회결과')+'.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    return;
+  }catch(err){
+    /* 사내 보안 정책 등으로 다운로드 자체가 막힌 극히 예외적인 환경이면 복사 모달로 대체 */
+  }
   showCopy(toTSV(head, bodyArrs), meta);
 }
 
@@ -4868,6 +5147,22 @@ TABS.forEach((t,i)=>{
 });
 syncTabFocus();
 
+/* 로그인 계정이 바뀌면(로그인/로그아웃) 이 브라우저에 저장된 "내 거래처"·"저장한 공고"·
+   "내가 쓴 글"·"답변 확인" 등을 그 계정 것으로 다시 불러오고 화면도 새로 그린다 —
+   계정마다 완전히 분리해서 보여주기 위함(예전엔 이 브라우저를 쓰는 모든 계정이 하나를 공유했음). */
+function reloadAccountScoped(){
+  FAV = (()=>{ try{ return new Set(JSON.parse(localStorage.getItem(acctKey(FAVKEY))||'[]')); }catch(e){ return new Set(); } })();
+  G2BFAV = (()=>{ try{ return new Set(JSON.parse(localStorage.getItem(acctKey(G2BFAVKEY))||'[]')); }catch(e){ return new Set(); } })();
+  try{ syncFavChip(); }catch(e){}
+  try{ syncG2bFavBtn(); }catch(e){}
+  try{ drawClients(true); }catch(e){}
+  try{ renderOpp(); }catch(e){}
+  try{ renderAskBadge(); }catch(e){}
+  try{ if(typeof ASKALL!=='undefined' && ASKALL.length) renderAskInbox(); }catch(e){}
+  try{ if(curClient) renderG2B(); }catch(e){}
+  try{ if($('#g2bFavModal') && $('#g2bFavModal').classList.contains('on')) renderG2bFavModal(); }catch(e){}
+}
+addEventListener('kma-signed-in', reloadAccountScoped);
 /* 로그아웃하면 조회 조건을 되돌린다 */
 addEventListener('kma-signed-out',()=>{
   try{
@@ -4883,6 +5178,7 @@ addEventListener('kma-signed-out',()=>{
     drawClients(true);
     iClear(); syncIChips(); syncISeg(); drawInst(true);
     goTab('p-sum'); syncTabFocus();
+    reloadAccountScoped();
   }catch(e){}
 });
 $('#scrim').addEventListener('click',closeDrawer);
@@ -4911,6 +5207,11 @@ renderPriorityContacts();
 renderOverview();
 initClientFilters();
 drawClients(true);
+$('#fOppOrderer').addEventListener('click',()=>{
+  OPP_ORDERER_ONLY=!OPP_ORDERER_ONLY;
+  $('#fOppOrderer').setAttribute('aria-pressed', OPP_ORDERER_ONLY?'true':'false');
+  renderOpp();
+});
 renderOpp();
 renderInst();
 initInst();
