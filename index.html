@@ -1274,6 +1274,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <span>매출이익 <b id="rProfit">0</b></span>
     <span>프로젝트 <b id="rProj">0</b>건</span>
     <span class="spacer"></span>
+    <button class="linkbtn" id="sortReset" type="button" hidden>정렬 초기화</button>
     <button class="linkbtn" id="copyTable">엑셀로 다운로드</button>
   </div>
 
@@ -2970,6 +2971,16 @@ function paintDFav(btn, id){
   btn.innerHTML=STAR+(on?'내 거래처':'내 거래처로 담기');
 }
 let cSort={k:'t',dir:-1}, cPg={page:1,size:50,total:0}, lastRows=[];
+const SORT_DEFAULT={k:'t',dir:-1};
+function syncSortReset(){
+  const b=$('#sortReset'); if(!b) return;
+  b.hidden = (cSort.k===SORT_DEFAULT.k && cSort.dir===SORT_DEFAULT.dir);
+}
+function paintSortTh(){
+  $$('#tblClient th.s').forEach(x=>x.classList.remove('asc','desc'));
+  const th=$('#tblClient th.s[data-k="'+cSort.k+'"]');
+  if(th) th.classList.add(cSort.dir>0?'asc':'desc');
+}
 
 function fillSelect(id,items,fmt){
   const s=$(id);
@@ -3025,9 +3036,18 @@ function initClientFilters(){
   $$('#tblClient th.s').forEach(th=>th.addEventListener('click',e=>{
     if(e.target.closest('.fh-btn,.fh-pop')) return;   /* 헤더 필터 아이콘/팝오버 클릭은 정렬로 안 이어진다 */
     const k=th.dataset.k;
-    cSort=(cSort.k===k)?{k:k,dir:-cSort.dir}:{k:k,dir:(k==='n'||k==='l')?1:-1};
-    $$('#tblClient th.s').forEach(x=>x.classList.remove('asc','desc'));
-    th.classList.add(cSort.dir>0?'asc':'desc'); drawClients(true); }));
+    const firstDir=(k==='n'||k==='l')?1:-1;
+    /* 세 단계 순환: 첫 클릭(기본 방향) → 두 번째 클릭(반대 방향) → 세 번째 클릭(기본 정렬로 초기화) —
+       정렬이 아닌 컬럼을 계속 눌러 왔다갔다만 하고 되돌아갈 수 없던 문제 해결. */
+    if(cSort.k===k && cSort.dir===firstDir){ cSort={k:k,dir:-firstDir}; }
+    else if(cSort.k===k){ cSort={...SORT_DEFAULT}; }
+    else { cSort={k:k,dir:firstDir}; }
+    paintSortTh(); syncSortReset(); drawClients(true); }));
+  const sortResetBtn=$('#sortReset');
+  if(sortResetBtn) sortResetBtn.addEventListener('click',()=>{
+    cSort={...SORT_DEFAULT}; paintSortTh(); syncSortReset(); drawClients(true);
+  });
+  syncSortReset();
   pgMount($('#cPager'), cPg, ()=>drawClients(false), '#cTools');
   $('#copyTable').addEventListener('click',copyClients);
   $('#tblClient tbody').addEventListener('click',e=>{
@@ -3335,9 +3355,6 @@ function openClient(id, wantReviewForm){
       '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
         '<button class="btn-ghost" id="clientInsightBtn" type="button">🔄 다시 생성</button>'+
         '<span class="formhint" id="clientInsightMsg"></span></div></div>'+
-    '<div class="card" id="clientNewsCard"><h3>최근 뉴스</h3>'+
-      '<p class="sub">네이버 뉴스에서 거래처명으로 검색한 결과입니다 · 참고용</p>'+
-      '<div id="clientNewsBody"><p class="formhint">불러오는 중…</p></div></div>'+
     '<div class="card" id="opCard"><h3>이 거래처에 대한 의견</h3>'+
       '<p class="sub">담당자가 알아야 할 <b>협업 경험</b>을 남겨주세요 — 의사결정 속도, 요구 수준, 정산 처리, 담당자 교체 등.</p>'+
       '<div id="opBox"></div></div>'+
@@ -3348,6 +3365,9 @@ function openClient(id, wantReviewForm){
         '<span>최근 '+ago(x.mo)+'</span></div>'+
         (s.why.length?'<div class="pm" style="margin-top:4px">'+s.why.map(w=>'<span class="tag">'+esc(w)+'</span>').join('')+'</div>':'')+
         '</div><div class="pv">'+won(x.t)+'</div></div>'; }).join('')+'</div></div>':'')+
+    '<div class="card" id="clientNewsCard"><h3>최근 뉴스</h3>'+
+      '<p class="sub">이 기관이 하려는 사업·계획 위주로 골라 실제 관련 기사인지 AI가 한 번 더 확인했습니다 · 참고용</p>'+
+      '<div id="clientNewsBody"><p class="formhint">불러오는 중…</p></div></div>'+
   '</div>';
   const dr=$('#drawer'); dr.innerHTML=html; dr.classList.add('on'); $('#scrim').classList.add('on');
   dSelYear=-1;
@@ -4387,14 +4407,18 @@ async function renderClientNews(c){
     if(!r.ok || j.error) throw new Error(j.error||raw.slice(0,300));
     const items=j.items||[];
     if(!items.length){
-      body.innerHTML='<p class="formhint">관련 뉴스를 찾지 못했습니다.</p>';
+      body.innerHTML='<p class="formhint">이 거래처와 실제로 관련된 뉴스를 찾지 못했습니다.</p>';
       return;
     }
-    body.innerHTML='<div class="plist">'+items.map(it=>
+    const note = j.verified===false
+      ? '<p class="formhint" style="margin-bottom:8px">⚠️ 지금은 AI 관련도 확인 없이 검색 결과를 그대로 보여드립니다.</p>'
+      : '';
+    body.innerHTML=note+'<div class="plist">'+items.map(it=>
       '<a class="pitem click" href="'+esc(it.link)+'" target="_blank" rel="noopener" style="display:flex;text-decoration:none;color:inherit">'+
         '<div style="min-width:0"><div class="pn">'+esc(it.title)+'</div>'+
         '<div class="pm" style="white-space:normal">'+esc(it.description)+'</div>'+
-        '<div class="pm" style="margin-top:4px">'+esc(fmtTs(it.pubDate)||'')+'</div></div>'+
+        '<div class="pm" style="margin-top:4px">'+esc(fmtTs(it.pubDate)||'')+
+          (it.reason?' · <span class="tag">'+esc(it.reason)+'</span>':'')+'</div></div>'+
       '</a>'
     ).join('')+'</div>';
   }catch(e){
