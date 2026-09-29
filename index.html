@@ -243,6 +243,8 @@ button.fact:hover{background:var(--surface-c)}
 .fact .f-d{font-size:13px;line-height:20px;color:var(--body-c)}
 .fact{gap:4px}
 .fact .f-t{margin-bottom:2px}
+.fact .f-dept{font-size:12.5px;line-height:18px;color:var(--muted-c);margin-top:4px;padding-top:8px;border-top:1px solid var(--border-c)}
+.fact .f-dept b{color:var(--fg);font-weight:600}
 
 /* ---------- 막대 ---------- */
 .blist{display:grid;gap:8px}
@@ -468,8 +470,6 @@ td.num{font-variant-numeric:tabular-nums}
 .linelist{margin:0;padding:0;list-style:none;display:grid;gap:7px}
 .linelist li{position:relative;padding-left:14px;font-size:14px;line-height:21px;color:var(--body-c)}
 .linelist li::before{content:'';position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--muted-c)}
-
-.note.ph-note{margin-bottom:16px}
 
 /* ---------- 컨트롤 ---------- */
 /* ---------- 데이터 기준 탭: 그림 설명 ---------- */
@@ -1049,7 +1049,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 .cqbtn.go{background:var(--weak-bg);border-color:transparent;color:var(--weak-fg);font-weight:700}
 .cqbtn.back{color:var(--muted-c)}
 .chat-input{flex:none;display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border-c);background:var(--bg)}
-.chat-input input{flex:1;min-width:0;border:1px solid var(--border-c);border-radius:999px;padding:9px 14px;font-size:13px;background:var(--canvas);color:var(--fg)}
+.chat-input input{flex:1;min-width:0;border:1px solid var(--border-c);border-radius:999px;padding:9px 14px;font-size:13px;background:var(--canvas);color:var(--fg);overflow:hidden;text-overflow:ellipsis}
 .chat-input input:focus{outline:none;border-color:var(--primary)}
 .chat-input button{flex:none;width:36px;height:36px;border-radius:50%;border:none;background:var(--primary);color:var(--on-primary);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .chat-input button:disabled{opacity:.5;cursor:default}
@@ -1066,6 +1066,62 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
   .stickyhead thead th{position:sticky;top:var(--h-bars);z-index:8;box-shadow:inset 0 -1px 0 var(--border-c)}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ==================== 거래처 리뷰 피드 (comment-feed style) ==================== */
+.rf-hidden{display:none!important}
+.rf-sortbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.rf-sortbtn{border:1px solid var(--border-c);background:var(--canvas);color:var(--body-c);
+  border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.rf-sortbtn.on{background:var(--fg);border-color:var(--fg);color:var(--canvas)}
+.rf-catwrap{position:relative;display:inline-block}
+.rf-catmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:20;display:none;flex-wrap:wrap;
+  gap:6px;background:var(--canvas);border:1px solid var(--border-c);border-radius:var(--r-ctl);
+  padding:8px;box-shadow:0 8px 24px rgba(20,24,32,.16);width:220px}
+.rf-catwrap:hover .rf-catmenu, .rf-catmenu:hover{display:flex}
+.rf-catmenu button{border:none;background:var(--surface-c);color:var(--body-c);border-radius:8px;
+  padding:6px 8px;font-size:12.5px;font-weight:600;cursor:pointer;width:calc(50% - 3px);text-align:center}
+.rf-catmenu button:hover{background:var(--weak-bg);color:var(--weak-fg)}
+.rf-catmenu button.on{background:var(--fg);color:var(--canvas)}
+.rf-catfilter{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--body-c);margin:0 0 10px}
+.rf-catfilter button{border:none;background:var(--surface-c);border-radius:999px;width:20px;height:20px;
+  cursor:pointer;color:var(--body-c);line-height:1}
+.rf-feed{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:900px){.rf-feed{grid-template-columns:1fr}}
+.rf-card{position:relative;border:1px solid var(--border-c);border-radius:var(--r-panel);
+  background:var(--canvas);padding:14px 16px 12px;overflow:hidden}
+.rf-chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;gap:8px}
+.rf-cname{font-weight:700;font-size:14px;cursor:pointer}
+.rf-cname:hover{color:var(--primary)}
+.rf-ccount{font-size:12px;color:var(--muted-c);white-space:nowrap}
+.rf-slot{min-height:150px;position:relative;padding:0 16px}
+.rf-cmt{position:absolute;left:16px;right:16px;top:0;padding-top:4px;opacity:1;transition:opacity .25s ease}
+.rf-cmt.hide{opacity:0;pointer-events:none}
+.rf-who{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rf-avatar{width:28px;height:28px;border-radius:50%;flex:none}
+.rf-who b{font-size:13px}
+.rf-who span.dept{font-size:11.5px;color:var(--muted-c)}
+.rf-new{background:var(--danger-bg);color:var(--danger);font-size:10.5px;font-weight:700;
+  border-radius:999px;padding:2px 7px;margin-left:2px}
+.rf-time{font-size:11.5px;color:var(--muted-c);margin-left:auto;white-space:nowrap}
+.rf-txt{font-size:13px;line-height:1.55;color:var(--fg);margin:0 0 8px;word-break:keep-all}
+.rf-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.rf-tag{font-size:11px;font-weight:600;background:var(--surface-c);color:var(--body-c);
+  border-radius:999px;padding:3px 9px;cursor:default}
+.rf-like{display:inline-flex;align-items:center;gap:5px;border:none;background:none;
+  color:var(--muted-c);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 0}
+.rf-like svg{width:15px;height:15px}
+.rf-like.on{color:var(--danger)}
+.rf-dots{display:flex;gap:4px;justify-content:center;margin-top:8px}
+.rf-dots i{width:5px;height:5px;border-radius:50%;background:var(--border-c);display:inline-block}
+.rf-dots i.on{background:var(--primary)}
+.rf-nav{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;
+  border:1px solid var(--border-c);background:var(--canvas);color:var(--body-c);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;opacity:.55;z-index:5;font-size:12px;padding:0;
+  line-height:1}
+.rf-card:hover .rf-nav{opacity:1}
+.rf-nav.prev{left:-2px}
+.rf-nav.next{right:-2px}
+.rf-empty{padding:30px 0;text-align:center;color:var(--muted-c);font-size:13px}
 </style>
 <!-- ==================== 로그인 ==================== -->
 <div id="login">
@@ -1126,7 +1182,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <button class="tab" role="tab" aria-selected="false" data-p="p-inst">
       <svg class="tabic" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6.1" r="3"/><path d="M3.2 15c.8-3 3-4.6 5.8-4.6s5 1.6 5.8 4.6"/></svg>
       <span>강사 풀 <small id="tiCount"></small></span></button>
-    <button class="tab" role="tab" aria-selected="false" data-p="p-note">
+    <button class="tab" role="tab" aria-selected="false" data-p="p-note" id="tabNote" hidden>
       <svg class="tabic" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.2" y="2.4" width="9.6" height="13.2" rx="1.6"/><path d="M6.6 6.4h4.8M6.6 9.2h4.8M6.6 12h3"/></svg>
       <span>데이터 기준</span></button>
   </div>
@@ -1137,6 +1193,25 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <section class="panel on" id="p-sum" role="tabpanel">
   <div class="eyebrow"><h2>데이터가 말해주는 것</h2><p>카드를 누르면 해당 목록으로 이동합니다</p></div>
   <div class="grid g3" id="sumFacts"></div>
+
+  <div class="eyebrow"><h2>신규 인사이트</h2><p>나라장터 신규 공고·실적 패턴을 바탕으로 뽑은 영업 신호입니다 · 카드를 누르면 가장 유력한 거래처로 이동합니다</p></div>
+  <div class="grid g3" id="sumFutureFacts"></div>
+
+  <div class="eyebrow"><h2>거래처 리뷰 피드</h2><p>특이사항이 있는 거래처 리뷰를 댓글처럼 모아 보여줍니다 · 카드를 누르면 거래처 상세로 이동합니다</p></div>
+  <div class="card" id="revFeedCard">
+    <div class="rf-sortbar" id="rfSortbar">
+      <button class="rf-sortbtn on" data-sort="recent" type="button">최신순</button>
+      <button class="rf-sortbtn" data-sort="likes" type="button">좋아요순</button>
+      <button class="rf-sortbtn" data-sort="count" type="button">리뷰 많은 순</button>
+      <div class="rf-catwrap">
+        <button class="rf-sortbtn" id="rfCatBtn" type="button">카테고리순 ▾</button>
+        <div class="rf-catmenu" id="rfCatMenu"></div>
+      </div>
+    </div>
+    <div class="rf-catfilter rf-hidden" id="rfCatFilter">카테고리: <b id="rfCatFilterName"></b> <button id="rfCatFilterClear" type="button">✕</button></div>
+    <div class="rf-feed" id="rfFeed"><p class="formhint">불러오는 중…</p></div>
+    <div id="rfMoreWrap" style="margin-top:12px"><button class="btn-ghost" id="rfMoreBtn" type="button">더 많은 기관 보기 ›</button></div>
+  </div>
 
   <div class="eyebrow"><h2>리뷰 기반 AI 인사이트</h2><p>거래처 리뷰가 쌓이면 영업에 참고할 만한 내용을 자동으로 요약합니다</p></div>
   <div class="card" id="aiInsightCard">
@@ -1353,7 +1428,9 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <div id="priorityContactBody"><p class="formhint">불러오는 중…</p></div>
   </div>
 
-  <div class="eyebrow"><h2>리뷰 요청이 필요한 거래처</h2><p>최근 프로젝트가 끝났는데 아직 리뷰가 없는 곳 · 눌러서 바로 리뷰를 남길 수 있습니다</p></div>
+  <div class="eyebrow"><h2>리뷰 요청이 필요한 거래처</h2><p>최근 프로젝트가 끝났는데 아직 리뷰가 없는 곳 · 눌러서 바로 리뷰를 남길 수 있습니다</p>
+    <button class="btn-ghost" id="reviewReqRefresh" type="button" style="margin-left:auto;flex:none">🔄 새로고침</button>
+  </div>
   <div class="card" id="reviewReqCard">
     <div id="reviewReqBody"><p class="formhint">불러오는 중…</p></div>
   </div>
@@ -1462,8 +1539,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
       두 데이터는 아직 연결되어 있지 않습니다.</p>
   </div>
 
-  <div class="eyebrow"><h2>먼저 이것만 알아두세요</h2>
-    <p>이 세 가지를 모르면 숫자를 잘못 읽게 됩니다</p></div>
+  <div class="eyebrow"><h2>먼저 알아둘 것</h2></div>
   <div class="grid g3">
     <div class="keycard">
       <span class="kc-no">1</span>
@@ -1533,8 +1609,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     </div>
   </div>
 
-  <div class="eyebrow"><h2>이건 조심해서 보세요</h2>
-    <p>알고 보면 괜찮지만, 모르고 보면 틀리게 읽게 되는 것들</p></div>
+  <div class="eyebrow"><h2>주의할 점</h2></div>
   <div class="grid g2">
     <div class="warn">
       <h4>2019–2021년 공공/민간 구분은 사실상 비어 있습니다</h4>
@@ -1644,7 +1719,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
   </div>
   <div class="chat-body" id="chatBody"></div>
   <form class="chat-input" id="chatInputForm">
-    <input id="chatFreeInput" type="text" placeholder="궁금한 걸 직접 입력해 보세요 (예: 고용노동부 최근에 어떤 걸 했나요?)" autocomplete="off" maxlength="300">
+    <input id="chatFreeInput" type="text" placeholder="궁금한 걸 질문해 주세요" autocomplete="off" maxlength="300">
     <button type="submit" id="chatSendBtn" aria-label="보내기">➤</button>
   </form>
 </aside>
@@ -1795,7 +1870,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     }).then(function(r){ return r.json(); }).then(function(j){
       loginBusy = false;
       if (j && j.ok){
-        try{ sessionStorage.setItem(SKEY, JSON.stringify({ id: id, label: j.label || id })); }catch(e){}
+        try{ sessionStorage.setItem(SKEY, JSON.stringify({ id: id, label: j.label || id, is_admin: !!j.is_admin })); }catch(e){}
         fail('');
         openApp(j.label || id);
       } else {
@@ -1842,6 +1917,17 @@ function curAcctId(){
     const o=JSON.parse(s);
     return (o && o.id) ? String(o.id) : '_guest';
   }catch(e){ return '_guest'; }
+}
+/* "데이터 기준" 탭을 관리자 계정에서만 보이게 하려고 로그인 세션에서 is_admin을 읽는다.
+   서버(board-login)가 실제 계정 확인 후 내려준 값이라, 이 화면을 여는 것 자체는 보안 장치가
+   아니지만 최소한 비밀번호를 모르는 사람이 우연히/실수로 들어오는 것은 막아준다. */
+function isAdminAcct(){
+  try{
+    const s=sessionStorage.getItem('kma-insight-auth');
+    if(!s) return false;
+    const o=JSON.parse(s);
+    return !!(o && o.is_admin);
+  }catch(e){ return false; }
 }
 function acctKey(base){ return base+'__'+curAcctId(); }
 /* 계정별 분리를 도입하기 전에는 이 값들이 계정 구분 없이 base 키 하나에 저장돼 있었다.
@@ -2006,6 +2092,48 @@ const sortedT=CL.slice().sort((a,b)=>b.t-a.t);
 const top10=sortedT.slice(0,10).reduce((s,c)=>s+c.t,0);
 const top50=sortedT.slice(0,50).reduce((s,c)=>s+c.t,0);
 const loyal6=CL.filter(c=>c.ny>=6), loyal6rev=loyal6.reduce((s,c)=>s+c.t,0);
+
+/* ---------- 부서명 별칭표 (2026년 조직도, 2025-11-01 시행 기준) ----------
+   과거 데이터(c.dv, 사업부문 태그)에는 조직개편 전 옛 이름이 그대로 남아 있을 수 있어서,
+   "주목 부서"를 집계하기 직전에 현재 실제로 존재하는 부서명으로 바꿔준다.
+   2026-09-29 사용자가 확인해준 2건(일자리사업→일자리창출본부, 대학사업→AI미래교육본부)과
+   조직도, 그리고 과거 사업부문 태그 샘플을 근거로 만든 1차본 — 표에 없는 태그는 원문 그대로
+   보여준다. 프로젝트 문서 `부서명_매핑_2026조직도.md`에 근거와 한계를 기록해 두었다. */
+const DEPT_ALIAS={
+  '일자리사업':'일자리창출본부', '일자리사업본부':'일자리창출본부', '일자리':'일자리창출본부', '일자리창출':'일자리창출본부',
+  '대학사업':'AI미래교육본부', '대학사업본부':'AI미래교육본부', '대학':'AI미래교육본부',
+  '평생교육':'평생교육본부',
+  '경영자과정':'경영자교육센터', '경영자교육':'경영자교육센터',
+  '부산지역본부':'부산경남본부', '부산':'부산경남본부', '경남지역본부':'부산경남본부',
+  '중부지역본부':'중부본부', '중부':'중부본부',
+  '대구지역본부':'대구경북본부', '대구':'대구경북본부', '경북지역본부':'대구경북본부',
+  '광주지역본부':'광주전남전북본부', '전남지역본부':'광주전남전북본부', '전북지역본부':'광주전남전북본부', '제주지역본부':'광주전남전북본부',
+  '인재혁신':'인재혁신그룹', '조직개발':'인재혁신그룹', '조직문화':'인재혁신그룹'
+};
+function applyDeptAlias(name){
+  if(!name) return name;
+  const t=String(name).trim();
+  return DEPT_ALIAS[t] || t;
+}
+/* 카드에 표시할 "주목 부서"를 실제 거래 데이터에서 계산한다. 각 거래처의 사업부문 태그
+   (c.dv — 거래처 상세 화면에도 그대로 보여주는, 실제 프로젝트 수행 이력에서 집계된 실제
+   부서/부문명)를 건수 가중치로 합산하고, DEPT_ALIAS로 옛 이름을 현재 부서명으로 바꾼 뒤
+   가장 많이 담당해 온 부서를 고른다. */
+function topDeptLabel(clients, topN){
+  topN=topN||1;
+  const m={};
+  (clients||[]).forEach(c=>{
+    if(!c || !c.dv) return;
+    c.dv.forEach(pair=>{
+      const raw=pair && pair[0], n=(pair && pair[1]) || 1;
+      if(!raw) return;
+      const name=applyDeptAlias(raw);
+      m[name]=(m[name]||0)+n;
+    });
+  });
+  const arr=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,topN).map(x=>x[0]);
+  return arr.length ? arr.join(' · ') : '영업팀';
+}
 
 function groupSum(keyFn){ const m=new Map();
   PJ.forEach(p=>{ const k=keyFn(p); if(k==null) return; const o=m.get(k)||{rev:0,n:0}; o.rev+=p[4]; o.n++; m.set(k,o); });
@@ -2232,6 +2360,7 @@ function pgMount(host,st,redraw,anchor){
 
 /* ==================== 요약 인사이트 ==================== */
 function goTab(id){
+  if(id==='p-note' && !isAdminAcct()) id='p-sum';  /* 관리자 전용 — 챗봇 바로가기 등으로도 못 들어오게 */
   $$('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.p===id?'true':'false'));
   $$('.panel').forEach(p=>p.classList.toggle('on', p.id===id));
   scrollTo({top:0,behavior:'instant'});
@@ -2373,6 +2502,19 @@ function renderSummary(){
     text:Math.round(yRev[i]/EOK), color:i===NY-1?'var(--s9)':'var(--primary)'}));
   const down=CL.filter(c=>c.st==='감소');
   const downPrev=down.reduce((s,c)=>s+c.p3,0), downNow=down.reduce((s,c)=>s+c.r3,0);
+
+  /* 카드별 "주목 부서" — 하드코딩 대신, 각 카드에 해당하는 거래처들의 실제 사업부문(c.dv)을
+     집계해서 가장 많이 담당해 온 부서를 보여준다(옛 조직명은 DEPT_ALIAS로 변환됨).
+     3번째(2025년 매출 감소) 카드는 특정 거래처 목록이 아니라 전사 추이 카드라, 실제로
+     2024→2025 매출이 줄어든 거래처들을 대리 목록으로 삼는다. */
+  const FACT_DEPT=[
+    topDeptLabel(sortedT.slice(0,10)),
+    topDeptLabel(loyal6),
+    topDeptLabel(CL.filter(c=>c.rv[5]>c.rv[6])),
+    topDeptLabel(CL.filter(c=>c.st==='재활성화 후보')),
+    topDeptLabel(down),
+    topDeptLabel(CL.filter(c=>c.st==='신규 진입'))
+  ];
 
   const facts=[
     ['dn', pct(top10,TOT).toFixed(1)+'%', '상위 10곳에 매출이 몰려 있습니다',
@@ -2520,11 +2662,12 @@ function renderSummary(){
         ]}); }]
   ];
   const fg=$('#sumFacts'); fg.innerHTML='';
-  facts.forEach(f=>{
+  facts.forEach((f,i)=>{
     const b=el('button','fact');
     b.type='button';
     b.innerHTML='<span class="f-n '+f[0]+'">'+f[1]+'</span><span class="f-t">'+f[2]+'</span>'+
-      '<span class="f-viz">'+f[3]+'</span><span class="f-d">'+f[4]+'</span>';
+      '<span class="f-viz">'+f[3]+'</span><span class="f-d">'+f[4]+'</span>'+
+      '<span class="f-dept">👀 <b>'+esc(FACT_DEPT[i])+'</b> 주목이 필요해요</span>';
     b.addEventListener('click',f[5]); fg.appendChild(b);
   });
 
@@ -2563,6 +2706,166 @@ function renderSummary(){
     click:()=>goClient({field:f.k})
   })));
 
+}
+
+/* ==================== 신규 인사이트 (나라장터 신규 공고 + 실적 패턴 기반) ====================
+   기존에 이미 쓰고 있던 실시간 전역 데이터만 사용한다 — G2BALL(거래처별 나라장터 매칭 공고),
+   G2BCOUNT(거래처별 지금 열려 있는 공고 수), ddayLabel()(마감 배지 계산), CL/PJ(실적 데이터).
+   거래처별 "최근 뉴스"는 거래처를 열 때마다 그 자리에서만 검색하고 목록을 어디에도 모아두지
+   않는 구조라, 이 홈 화면 카드에서는 아직 쓰지 않는다(뉴스를 미리 모아두는 별도 저장소가
+   생기면 다음 단계로 추가 검토). G2BALL은 loadG2bNotices()가 비동기로 채우므로, 그 성공
+   콜백에서도 이 함수를 다시 호출해 최신 데이터로 갱신한다. */
+function renderFutureInsights(){
+  const fg=$('#sumFutureFacts'); if(!fg) return;
+  const hasG2B=Array.isArray(G2BALL) && G2BALL.length>0;
+
+  const openByClient={};
+  if(hasG2B){
+    G2BALL.forEach(g=>{
+      if(!g.cid) return;
+      const dday=ddayLabel(g.closeDt);
+      if(!dday) return;
+      (openByClient[g.cid]=openByClient[g.cid]||[]).push({g,dday});
+    });
+  }
+
+  const reactSignalFull=Object.keys(openByClient)
+    .map(cid=>byId[cid]).filter(c=>c && (c.st==='재활성화 후보' || c.st==='감소'))
+    .sort((a,b)=>((openByClient[b.id]||[]).length-(openByClient[a.id]||[]).length) || (b.t-a.t));
+  const reactSignal=reactSignalFull.slice(0,4);
+
+  const prepRows=[];
+  Object.keys(openByClient).forEach(cid=>{
+    const c=byId[cid]; if(!c) return;
+    openByClient[cid].forEach(({g,dday})=>{
+      const days=dday==='오늘 마감' ? 0 : (parseInt(String(dday).replace('D-',''),10)||0);
+      if(days>=4 && days<=21) prepRows.push({c,g,dday,days});
+    });
+  });
+  prepRows.sort((a,b)=>a.days-b.days);
+  const seenPrep=new Set();
+  const prepDedupFull=prepRows.filter(r=>{ if(seenPrep.has(r.c.id)) return false; seenPrep.add(r.c.id); return true; });
+  const prepTop=prepDedupFull.slice(0,4);
+
+  const newFieldRows=[];
+  Object.keys(openByClient).forEach(cid=>{
+    const c=byId[cid]; if(!c) return;
+    const dset=new Set(c.dset||[]);
+    openByClient[cid].forEach(({g,dday})=>{
+      const cat=(g.category||'').trim();
+      if(cat && !dset.has(cat)) newFieldRows.push({c,g,dday,cat});
+    });
+  });
+  const seenNF=new Set();
+  const newFieldDedupFull=newFieldRows.filter(r=>{ if(seenNF.has(r.c.id)) return false; seenNF.add(r.c.id); return true; })
+    .sort((a,b)=>b.c.t-a.c.t);
+  const newFieldTop=newFieldDedupFull.slice(0,4);
+
+  const crossSellFull=Object.keys(openByClient)
+    .map(cid=>byId[cid]).filter(c=>c && c.ny>=4)
+    .sort((a,b)=>b.t-a.t);
+  const crossSell=crossSellFull.slice(0,4);
+
+  const monthsByClient={};
+  PJ.forEach(p=>{
+    const cid=p[1], d=p[3];
+    if(!cid || !d) return;
+    const dt=new Date(d); if(isNaN(dt)) return;
+    (monthsByClient[cid]=monthsByClient[cid]||[]).push(dt);
+  });
+  const nowD=new Date();
+  const recurringRows=[];
+  Object.keys(monthsByClient).forEach(cid=>{
+    const c=byId[cid]; if(!c || openByClient[cid]) return;
+    const byYear={};
+    monthsByClient[cid].forEach(dt=>{ const y=dt.getFullYear(); if(!byYear[y]) byYear[y]=dt; });
+    const years=Object.keys(byYear).map(Number).sort((a,b)=>a-b);
+    if(years.length<3) return;
+    const months=years.map(y=>byYear[y].getMonth());
+    const spread=Math.max(...months)-Math.min(...months);
+    if(spread>1) return;
+    const lastYear=years[years.length-1];
+    const lastDate=byYear[lastYear];
+    let nextDate=new Date(lastYear+1, lastDate.getMonth(), Math.min(lastDate.getDate(),28));
+    if(nextDate<nowD) nextDate=new Date(nowD.getFullYear(), lastDate.getMonth(), Math.min(lastDate.getDate(),28));
+    const diffDays=Math.round((nextDate-nowD)/86400000);
+    if(diffDays>=0 && diffDays<=60) recurringRows.push({c,nextDate,diffDays});
+  });
+  recurringRows.sort((a,b)=>a.diffDays-b.diffDays);
+  const recurringTop=recurringRows.slice(0,4);
+
+  const multiFull=hasG2B
+    ? Object.keys(openByClient).filter(cid=>openByClient[cid].length>=2)
+        .map(cid=>({c:byId[cid], n:openByClient[cid].length})).filter(r=>r.c)
+        .sort((a,b)=>b.n-a.n)
+    : [];
+  const multiRows=multiFull.slice(0,4);
+
+  const fmtDay=d=> d===0 ? '오늘 마감' : ('D-'+d);
+
+  const FUTURE_DEPT=[
+    topDeptLabel(reactSignalFull),
+    topDeptLabel(prepDedupFull.map(r=>r.c)),
+    topDeptLabel(newFieldDedupFull.map(r=>r.c)),
+    topDeptLabel(crossSellFull),
+    topDeptLabel(recurringRows.map(r=>r.c)),
+    topDeptLabel(multiFull.map(r=>r.c))
+  ];
+
+  const futureFacts=[
+    ['up', cnt(reactSignal.length)+'곳', '영업 기회 신호',
+      reactSignal.length ? miniList(reactSignal.map(c=>({label:c.n, text:(openByClient[c.id]||[]).length+'건 공고'}))) : '',
+      reactSignalFull.length
+        ? '한동안 조용했던 거래처 '+cnt(reactSignalFull.length)+'곳에 방금 새 나라장터 공고가 떴어요.'
+        : '지금은 조용했던 거래처 중 새 공고가 뜬 곳이 없어요. 조건에 맞는 곳이 생기면 여기 표시돼요.',
+      ()=>{ if(reactSignal[0]) openClient(reactSignal[0].id); }],
+
+    ['', cnt(prepTop.length)+'건', '지금 준비하면 늦지 않는 공고',
+      prepTop.length ? miniList(prepTop.map(r=>({label:r.c.n, text:fmtDay(r.days)}))) : '',
+      prepDedupFull.length
+        ? '마감까지 4~21일 남아 제안서를 준비할 시간이 있는 신규 매칭 공고예요.'
+        : '지금은 준비 시간이 여유로운(4~21일) 신규 매칭 공고가 없어요.',
+      ()=>{ if(prepTop[0]) openClient(prepTop[0].c.id); }],
+
+    ['up', cnt(newFieldTop.length)+'곳', '도전해볼 신규 분야',
+      newFieldTop.length ? miniList(newFieldTop.map(r=>({label:r.c.n, text:esc(r.cat)}))) : '',
+      newFieldDedupFull.length
+        ? '기존 거래처가 우리가 아직 안 해본 분야의 공고를 냈어요 — 새 분야 제안 기회예요.'
+        : '지금은 기존 사업부문과 다른 분야의 신규 공고가 없어요.',
+      ()=>{ if(newFieldTop[0]) openClient(newFieldTop[0].c.id); }],
+
+    ['up', cnt(crossSell.length)+'곳', '지금이 교차 제안 타이밍',
+      crossSell.length ? miniList(crossSell.map(c=>({label:c.n, text:c.ny+'년째'}))) : '',
+      crossSellFull.length
+        ? '4년 이상 함께한 우수 거래처가 지금 활발히 공고를 내고 있어요 — 교차 제안을 해보세요.'
+        : '지금은 오래된 우수 거래처 중 활발히 공고를 내는 곳이 없어요.',
+      ()=>{ if(crossSell[0]) openClient(crossSell[0].id); }],
+
+    ['', cnt(recurringTop.length)+'곳', '내년 시즌 미리 준비하기',
+      recurringTop.length ? miniList(recurringTop.map(r=>({label:r.c.n, text:r.diffDays+'일 후 예상'}))) : '',
+      recurringRows.length
+        ? '매년 비슷한 시기에 공고를 내온 거래처인데, 아직 올해 건 공고가 안 떴어요. 먼저 준비해보세요.'
+        : '지금은 60일 안에 시즌이 돌아오는 반복 패턴 거래처가 없어요.',
+      ()=>{ if(recurringTop[0]) openClient(recurringTop[0].c.id); }],
+
+    ['dn', cnt(multiRows.length)+'곳', '동시 진행 중인 공고',
+      multiRows.length ? miniList(multiRows.map(r=>({label:r.c.n, text:r.n+'건 동시 진행'}))) : '',
+      multiFull.length
+        ? '이 거래처들은 지금 공고를 2건 이상 동시에 진행하고 있어요 — 종합 제안을 검토해보세요.'
+        : '지금은 공고를 동시에 2건 이상 진행 중인 거래처가 없어요.',
+      ()=>{ if(multiRows[0]) openClient(multiRows[0].c.id); }]
+  ];
+
+  fg.innerHTML='';
+  futureFacts.forEach((f,i)=>{
+    const b=el('button','fact');
+    b.type='button';
+    b.innerHTML='<span class="f-n '+f[0]+'">'+f[1]+'</span><span class="f-t">'+f[2]+'</span>'+
+      (f[3]?'<span class="f-viz">'+f[3]+'</span>':'')+'<span class="f-d">'+f[4]+'</span>'+
+      '<span class="f-dept">👀 <b>'+esc(FUTURE_DEPT[i])+'</b> 주목이 필요해요</span>';
+    b.addEventListener('click',f[5]);
+    fg.appendChild(b);
+  });
 }
 
 /* ==================== 전사 현황 ==================== */
@@ -3908,8 +4211,6 @@ function openInst(idx){
       (x.k?'<span>·</span><span>'+esc(x.k)+'</span>':'')+'</div></div></div>'+
     '<button class="dclose" id="ix" aria-label="닫기">✕</button></div>'+
   '<div class="dbody">'+
-    (!x.img?'<div class="note inset ph-note"><b>사진 준비 중</b> — 강사 사진은 아직 등록되어 있지 않습니다. '+
-      '위하고에서 사진을 모아 오면 이 자리에 자동으로 채워집니다.</div>':'')+
     '<div class="card"><h3>기본 정보</h3><dl class="dl">'+
       '<dt>소속·직함</dt><dd>'+esc(x.co||'—')+'</dd>'+
       '<dt>직급</dt><dd>'+esc(x.po||'—')+'</dd>'+
@@ -4091,6 +4392,7 @@ function chatPick(o){
   if(o.go){ goTab(o.go); }
   if(o.act==='fav'){ goTab('p-client'); showFavorites(); }
   if(o.act==='ask'){ openAsk(); }
+  if(o.act==='openClient'){ openClient(o.id); const panel=$('#chatPanel'); if(panel) panel.hidden=true; }
   if(o.to){ chatShow(o.to); }
   else if(o.go || o.act){
     chatTyping(()=>{
@@ -4160,7 +4462,15 @@ async function chatAskFree(question){
     }else{
       chatMsg('bot','<p>\uc9c0\uae08\uc740 \ub2f5\ubcc0\uc744 \uac00\uc838\uc624\uc9c0 \ubabb\ud588\uc5b4\uc694. \ubb38\uc758\ud558\uae30\ub85c \ub0a8\uaca8\uc8fc\uc2dc\uba74 \uc0ac\ub78c\uc774 \ud655\uc778\ud560\uac8c\uc694.</p>');
     }
-    chatQuick([{t:'\ubb38\uc758\ud558\uae30 \uc5f4\uae30', act:'ask'},{t:'\uba54\uc778 \uba54\ub274', to:'root'}]);
+    /* \ub2f5\ubcc0\uc774 \ud2b9\uc815 \uac70\ub798\ucc98\ub97c \ucc3e\uc544 \ucc38\uace0\ud588\uc73c\uba74, \ud14d\uc2a4\ud2b8\ub85c \ubabb\ub2e4\ud55c \ubd80\ubd84\uc740 \uadf8 \uac70\ub798\ucc98 \uc0c1\uc138\uc5d0\uc11c
+       \uc9c1\uc811 \uc0b4\ud3b4\ubcfc \uc218 \uc788\uac8c \ubc14\ub85c\uac00\uae30 \ubc84\ud2bc\uc744 \ud558\ub098 \ubd99\uc5ec\uc900\ub2e4 \u2014 \ucc57\ubd07\uc774 "\uc5c6\ub2e4"\uace0\ub9cc \ud558\uace0
+       \ub05d\ub0b4\uc9c0 \uc54a\ub3c4\ub85d. */
+    const quick=[];
+    if(j && j.matched_client && byId[j.matched_client]){
+      quick.push({t:'\ud83d\udd0e '+j.matched_client+' \uc0c1\uc138 \ubcf4\uae30', act:'openClient', id:j.matched_client});
+    }
+    quick.push({t:'\ubb38\uc758\ud558\uae30 \uc5f4\uae30', act:'ask'},{t:'\uba54\uc778 \uba54\ub274', to:'root'});
+    chatQuick(quick);
   }catch(e){
     row.remove();
     chatMsg('bot','<p>\uc9c0\uae08\uc740 \ub2f5\ubcc0\uc744 \uac00\uc838\uc624\uc9c0 \ubabb\ud588\uc5b4\uc694(\uc5f0\uacb0 \ubb38\uc81c). \ubb38\uc758\ud558\uae30\ub85c \ub0a8\uaca8\uc8fc\uc2dc\uba74 \uc0ac\ub78c\uc774 \ud655\uc778\ud560\uac8c\uc694.</p>');
@@ -4334,6 +4644,10 @@ async function refreshReviewCounts(){
     OPCOUNT={};
     rows.forEach(r=>{ if(r.company_name) OPCOUNT[r.company_name]=(OPCOUNT[r.company_name]||0)+1; });
     if(typeof drawClients==='function') drawClients(false);
+    /* 리뷰가 하나라도 쌓이면 그 거래처는 "리뷰 요청이 필요한 거래처" 목록에서 빠지고
+       다음 순번(누적 매출 큰 순)이 올라와야 계속 다음 거래처의 리뷰를 유도할 수 있다.
+       카운트를 다시 셀 때마다 이 목록도 같이 새로 그린다. */
+    if(typeof renderReviewRequests==='function') renderReviewRequests();
   }catch(e){ /* 배지 갱신 실패는 조용히 무시 — 리뷰 작성 자체와는 무관 */ }
 }
 async function loadCompanyReviews(name){
@@ -4342,7 +4656,15 @@ async function loadCompanyReviews(name){
   }catch(e){ REVIEWS=[]; }
   REVIEWSREADY=true;
 }
-async function initReviews(){ await refreshReviewCounts(); renderReviewRequests(); }
+async function initReviews(){
+  await refreshReviewCounts();
+  const btn=$('#reviewReqRefresh');
+  if(btn) btn.addEventListener('click', async ()=>{
+    btn.disabled=true; btn.textContent='새로고침 중…';
+    await refreshReviewCounts();
+    btn.disabled=false; btn.textContent='🔄 새로고침';
+  });
+}
 
 /* ---------- 리뷰 기반 AI 인사이트 (요약 인사이트 탭) ---------- */
 function formatInsightHtml(text){
@@ -4491,6 +4813,204 @@ function initAiInsight(){
   });
 }
 
+/* ---------- 거래처 리뷰 피드 (요약 인사이트 탭 — 댓글 피드 스타일) ----------
+   2026-09-28: "리뷰 기반 AI 인사이트"(insights.__ALL__ 텍스트 한 덩어리)가 너무 길고
+   안 읽힌다는 피드백으로, 네이버/인스타 댓글처럼 거래처별 리뷰 하나씩을 카드로 보여주고
+   몇 초마다 자동으로 다음 리뷰로 넘어가는 피드로 교체했다. 정렬(최신순/좋아요순/리뷰
+   많은 순/카테고리순), 좌우 화살표, 좋아요, "더보기"를 지원한다.
+   좋아요는 reviews.like_count 컬럼(reviews_likes_migration.sql 실행 필요)이 있으면
+   서버에 저장되고, 없거나 갱신 권한이 없으면(RLS) 이 브라우저 세션에서만 반영된다. */
+let HOMEFEED=[];
+let rfSort='recent', rfCategory=null, rfVisible=6;
+let rfPaused=new Set();
+let rfLiked=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem('kmaLikedReviews')||'[]')); }catch(e){ return new Set(); } })();
+function rfSaveLiked(){ try{ localStorage.setItem('kmaLikedReviews', JSON.stringify([...rfLiked])); }catch(e){} }
+function hashStr(s){ s=String(s||''); let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
+function rfMaskName(n){ n=String(n||'').trim(); if(!n) return '익명'; return n[0]+'〇'.repeat(Math.max(1,n.length-1)); }
+const RF_AVATAR_COLORS=['#3182f6','#2fb380','#f59f00','#a855f7','#ef4444','#0ea5e9','#14b8a6','#f472b6'];
+function rfAvatarSVG(seed){
+  const color=RF_AVATAR_COLORS[hashStr(seed)%RF_AVATAR_COLORS.length];
+  return '<svg viewBox="0 0 40 40" class="rf-avatar" aria-hidden="true">'+
+    '<circle cx="20" cy="20" r="20" fill="'+color+'" opacity=".18"/>'+
+    '<circle cx="20" cy="16" r="7" fill="'+color+'"/>'+
+    '<path d="M6 35c1.5-8 7-12 14-12s12.5 4 14 12" fill="'+color+'"/></svg>';
+}
+function rfFmtAgo(iso){
+  const t=new Date(iso).getTime(); if(isNaN(t)) return '';
+  const diff=Math.max(0, Date.now()-t), m=Math.floor(diff/60000);
+  if(m<1) return '방금 전';
+  if(m<60) return m+'분 전';
+  const h=Math.floor(m/60); if(h<24) return h+'시간 전';
+  const d=Math.floor(h/24); if(d<7) return d+'일 전';
+  return fmtTs(iso).slice(0,10);
+}
+function rfIsNew(iso){ const t=new Date(iso).getTime(); return !isNaN(t) && (Date.now()-t) < 24*3600*1000; }
+function rfCategoryOf(tag){ return String(tag||'').split(/[·\s]/)[0]; }
+function rfLikes(o){ return (o.like_count||0) + (o._likeDelta||0); }
+
+async function loadHomeReviewFeed(){
+  const host=$('#rfFeed');
+  try{
+    const rows=await sbSelect('reviews?order=created_at.desc&limit=300');
+    const byCo={};
+    rows.forEach(o=>{ (byCo[o.company_name]=byCo[o.company_name]||[]).push(o); });
+    HOMEFEED=Object.keys(byCo).map(name=>({name, revs:byCo[name]}));
+  }catch(e){
+    HOMEFEED=[];
+    if(host) host.innerHTML='<p class="rf-empty">리뷰를 불러오지 못했습니다 — '+esc(e&&e.message||String(e))+'</p>';
+    return;
+  }
+  rfRenderCatMenu();
+  rfRender();
+}
+function rfCategories(){
+  const freq={};
+  HOMEFEED.forEach(c=>c.revs.forEach(o=>(o.tags||[]).forEach(t=>{
+    const k=rfCategoryOf(t); if(!k) return; freq[k]=(freq[k]||0)+1;
+  })));
+  return Object.keys(freq).sort((a,b)=>freq[b]-freq[a]);
+}
+function rfRenderCatMenu(){
+  const menu=$('#rfCatMenu'); if(!menu) return;
+  const cats=rfCategories();
+  menu.innerHTML=cats.map(k=>'<button type="button" data-cat="'+esc(k)+'"'+(rfCategory===k?' class="on"':'')+'>'+esc(k)+'</button>').join('');
+  menu.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    rfSort='category'; rfCategory=b.dataset.cat; rfVisible=6; rfRender();
+  }));
+}
+function rfSyncSortButtons(){
+  document.querySelectorAll('#rfSortbar > .rf-sortbtn').forEach(b=>{
+    b.classList.toggle('on', b.dataset.sort===rfSort && rfSort!=='category');
+  });
+  const catBtn=$('#rfCatBtn'); if(catBtn) catBtn.classList.toggle('on', rfSort==='category');
+  const filter=$('#rfCatFilter'), filterName=$('#rfCatFilterName');
+  if(filter) filter.classList.toggle('rf-hidden', !(rfSort==='category' && rfCategory));
+  if(filterName) filterName.textContent=rfCategory||'';
+  const menu=$('#rfCatMenu'); if(menu) menu.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.cat===rfCategory));
+}
+function rfRanked(){
+  let list=HOMEFEED.map(c=>({name:c.name, revs:c.revs}));
+  if(rfSort==='category' && rfCategory){
+    list=list.map(c=>({name:c.name, revs:c.revs.filter(o=>(o.tags||[]).some(t=>rfCategoryOf(t)===rfCategory))}))
+      .filter(c=>c.revs.length>0);
+  }
+  list=list.map(c=>{
+    const latest=c.revs.reduce((m,o)=>Math.max(m,new Date(o.created_at).getTime()||0),0);
+    const totalLikes=c.revs.reduce((s,o)=>s+rfLikes(o),0);
+    return Object.assign({}, c, {latest, totalLikes, count:c.revs.length});
+  });
+  if(rfSort==='likes') list.sort((a,b)=>b.totalLikes-a.totalLikes || b.latest-a.latest);
+  else if(rfSort==='count') list.sort((a,b)=>b.count-a.count || b.latest-a.latest);
+  else list.sort((a,b)=>b.latest-a.latest);
+  return list;
+}
+function rfCardHTML(c){
+  const revs=c.revs.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const cid='rf-'+hashStr(c.name);
+  const slots=revs.map((o,i)=>{
+    const name=o.anon? '익명' : rfMaskName(o.author_name);
+    const liked=rfLiked.has(o.id), likeN=rfLikes(o);
+    return '<div class="rf-cmt'+(i===0?'':' hide')+'" data-idx="'+i+'">'+
+      '<div class="rf-who">'+(o.anon?'<span class="rf-avatar" style="display:inline-block;background:var(--surface-c)"></span>':rfAvatarSVG(o.author_name||o.id))+
+      '<b>'+esc(name)+'</b>'+(o.dept&&!o.anon?'<span class="dept">'+esc(o.dept)+'</span>':'')+
+      (rfIsNew(o.created_at)?'<span class="rf-new">NEW</span>':'')+
+      '<span class="rf-time">'+esc(rfFmtAgo(o.created_at))+'</span></div>'+
+      '<p class="rf-txt">'+esc(o.content||'')+'</p>'+
+      '<div class="rf-tags">'+(o.tags||[]).map(t=>'<span class="rf-tag">'+esc(t)+'</span>').join('')+'</div>'+
+      '<button type="button" class="rf-like'+(liked?' on':'')+'" data-id="'+esc(o.id)+'">'+
+      '<svg viewBox="0 0 24 24" fill="'+(liked?'currentColor':'none')+'" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.1 2 4.5 5.5 4c2-.3 3.8.7 4.9 2.3C11.5 4.7 13.3 3.7 15.3 4c3.5.5 5.1 4.1 3.5 7.7C16.3 16.4 12 21 12 21z"/></svg>'+
+      '<span>'+likeN+'</span></button>'+
+    '</div>';
+  }).join('');
+  const dots=revs.length>1? '<div class="rf-dots">'+revs.map((_,i)=>'<i'+(i===0?' class="on"':'')+'></i>').join('')+'</div>' : '';
+  const navs=revs.length>1? '<button type="button" class="rf-nav prev" aria-label="이전 리뷰">‹</button><button type="button" class="rf-nav next" aria-label="다음 리뷰">›</button>' : '';
+  return '<div class="rf-card" data-co="'+cid+'">'+
+    '<div class="rf-chead"><span class="rf-cname" data-goname="'+esc(c.name)+'">'+esc(c.name)+'</span><span class="rf-ccount">리뷰 '+c.count+'건</span></div>'+
+    '<div class="rf-slot">'+slots+navs+'</div>'+dots+
+  '</div>';
+}
+function rfRender(){
+  const host=$('#rfFeed'); if(!host) return;
+  const ranked=rfRanked();
+  const mw=$('#rfMoreWrap');
+  if(!ranked.length){
+    host.innerHTML='<p class="rf-empty">표시할 리뷰가 없습니다.</p>';
+    if(mw) mw.style.display='none';
+    rfSyncSortButtons(); return;
+  }
+  const show=ranked.slice(0, rfVisible);
+  host.innerHTML=show.map(rfCardHTML).join('');
+  if(mw) mw.style.display = ranked.length>rfVisible? '' : 'none';
+  rfWireCard();
+  rfSyncSortButtons();
+}
+function rfCurIndex(card){ const cur=card.querySelector('.rf-cmt:not(.hide)'); return cur? +cur.dataset.idx : 0; }
+function rfShowIndex(card, idx){
+  const slots=card.querySelectorAll('.rf-cmt'); if(!slots.length) return;
+  const n=slots.length; idx=((idx%n)+n)%n;
+  slots.forEach(s=>s.classList.toggle('hide', +s.dataset.idx!==idx));
+  card.querySelectorAll('.rf-dots i').forEach((d,i)=>d.classList.toggle('on', i===idx));
+}
+function rfWireCard(){
+  const host=$('#rfFeed'); if(!host) return;
+  host.querySelectorAll('.rf-cname[data-goname]').forEach(n=>n.addEventListener('click',()=>{
+    const c=CL.find(x=>x.n===n.dataset.goname); if(c) openClient(c.id);
+  }));
+  host.querySelectorAll('.rf-nav.prev').forEach(n=>n.addEventListener('click',()=>{
+    const card=n.closest('.rf-card'); rfShowIndex(card, rfCurIndex(card)-1);
+  }));
+  host.querySelectorAll('.rf-nav.next').forEach(n=>n.addEventListener('click',()=>{
+    const card=n.closest('.rf-card'); rfShowIndex(card, rfCurIndex(card)+1);
+  }));
+  host.querySelectorAll('.rf-like').forEach(n=>n.addEventListener('click', async ()=>{
+    const id=n.dataset.id;
+    let rec=null; HOMEFEED.forEach(c=>c.revs.forEach(o=>{ if(o.id===id) rec=o; }));
+    if(!rec) return;
+    const wasOn=n.classList.contains('on');
+    if(wasOn){ rfLiked.delete(id); rec._likeDelta=(rec._likeDelta||0)-1; }
+    else { rfLiked.add(id); rec._likeDelta=(rec._likeDelta||0)+1; }
+    rfSaveLiked();
+    n.classList.toggle('on', !wasOn);
+    const span=n.querySelector('span'); if(span) span.textContent=rfLikes(rec);
+    try{
+      const target=(rec.like_count||0)+rec._likeDelta;
+      const r=await fetch(SUPABASE_URL+'/rest/v1/reviews?id=eq.'+encodeURIComponent(id), {
+        method:'PATCH', headers:sbHeaders({Prefer:'return=minimal'}), body:JSON.stringify({like_count:target})
+      });
+      if(r.ok){ rec.like_count=target; rec._likeDelta=0; }
+    }catch(e){ /* like_count 컬럼이 없거나 갱신 권한이 없으면 이 브라우저 세션에서만 반영됨 */ }
+  }));
+  host.querySelectorAll('.rf-card').forEach(card=>{
+    card.addEventListener('mouseenter',()=>rfPaused.add(card.dataset.co));
+    card.addEventListener('mouseleave',()=>rfPaused.delete(card.dataset.co));
+  });
+}
+function rfWireSortbar(){
+  document.querySelectorAll('#rfSortbar > .rf-sortbtn').forEach(b=>b.addEventListener('click',()=>{
+    rfSort=b.dataset.sort; rfCategory=null; rfVisible=6; rfRender();
+  }));
+  const clr=$('#rfCatFilterClear'); if(clr) clr.addEventListener('click',()=>{
+    rfSort='recent'; rfCategory=null; rfVisible=6; rfRender();
+  });
+  const more=$('#rfMoreBtn'); if(more) more.addEventListener('click',()=>{ rfVisible+=6; rfRender(); });
+}
+let rfTimer=null;
+function rfStartRotation(){
+  if(rfTimer) clearInterval(rfTimer);
+  rfTimer=setInterval(()=>{
+    document.querySelectorAll('#rfFeed .rf-card').forEach(card=>{
+      if(rfPaused.has(card.dataset.co)) return;
+      const slots=card.querySelectorAll('.rf-cmt'); if(slots.length<2) return;
+      rfShowIndex(card, rfCurIndex(card)+1);
+    });
+  }, 4500);
+}
+function initHomeReviewFeed(){
+  rfWireSortbar();
+  loadHomeReviewFeed();
+  rfStartRotation();
+}
+
 function initDB(){
   loadInquiries();
   loadG2bNotices();
@@ -4521,6 +5041,7 @@ async function loadG2bNotices(){
     G2BALL.forEach(g=>{ if(g.cid && ddayLabel(g.closeDt)) G2BCOUNT[g.cid]=(G2BCOUNT[g.cid]||0)+1; });
     renderG2B();
     renderG2bDeadlineAlerts();
+    renderFutureInsights();
     if($('#g2bFavModal') && $('#g2bFavModal').classList.contains('on')) renderG2bFavModal();
     if(typeof drawClients==='function') drawClients(false);
   }catch(e){ try{ console.warn('[g2b] load failed', e); }catch(_){} }
@@ -5228,7 +5749,18 @@ function reloadAccountScoped(){
   try{ if(curClient) renderG2B(); }catch(e){}
   try{ if($('#g2bFavModal') && $('#g2bFavModal').classList.contains('on')) renderG2bFavModal(); }catch(e){}
 }
+function syncAdminTabVisibility(){
+  const t=$('#tabNote'); if(!t) return;
+  const admin=isAdminAcct();
+  t.hidden=!admin;
+  /* 관리자가 아닌데 어떤 경로(예: 챗봇 바로가기)로든 데이터 기준 화면에 있었다면
+     요약 인사이트로 되돌린다 — 탭만 숨기고 화면은 그대로 두면 주소만으로 접근한 것과
+     다를 바 없어진다. */
+  if(!admin && $('#p-note') && $('#p-note').classList.contains('on')) goTab('p-sum');
+}
 addEventListener('kma-signed-in', reloadAccountScoped);
+addEventListener('kma-signed-in', syncAdminTabVisibility);
+addEventListener('kma-signed-out', ()=>{ const t=$('#tabNote'); if(t) t.hidden=true; });
 /* 로그아웃하면 조회 조건을 되돌린다 */
 addEventListener('kma-signed-out',()=>{
   try{
@@ -5269,6 +5801,7 @@ syncG2bFavBtn();
 $('#asof').textContent='2019–2026 · 기준 '+D.meta.asof;
 
 renderSummary();
+renderFutureInsights();
 renderPriorityContacts();
 renderOverview();
 initClientFilters();
@@ -5286,6 +5819,7 @@ initAsk();
 initDB();
 initReviews();
 initAiInsight();
+initHomeReviewFeed();
 initChat();
 syncToTop();
 })();
