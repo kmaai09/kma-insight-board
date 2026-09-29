@@ -1122,6 +1122,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 .rf-nav.prev{left:2px}
 .rf-nav.next{right:2px}
 .rf-empty{padding:30px 0;text-align:center;color:var(--muted-c);font-size:13px}
+.pcl-tile:not(.active):hover{border-color:var(--muted-c)}
 </style>
 <!-- ==================== 로그인 ==================== -->
 <div id="login">
@@ -1370,7 +1371,14 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <table id="tblClient" class="stickyhead">
       <thead><tr>
         <th class="favth" aria-label="내 거래처"></th>
-        <th class="s" data-k="n">거래처</th><th>상태</th>
+        <th class="s" data-k="n">거래처</th>
+        <th class="fh" data-fh="state">
+          <span class="th-lab">상태</span>
+          <button class="fh-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="상태로 좁히기" title="상태로 좁히기">
+            <svg viewBox="0 0 12 12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2.5h9M3.5 6h5M5 9.5h2"/></svg>
+          </button>
+          <div class="fh-pop" hidden><div class="chips" id="fStateHead" style="width:190px"></div></div>
+        </th>
         <th class="s r fh" data-k="t" data-fh="rev">
           <span class="th-lab">누적 매출</span>
           <button class="fh-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="누적 매출로 좁히기" title="누적 매출로 좁히기">
@@ -1417,16 +1425,14 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <!-- ==================== 영업 기회 ==================== -->
 <section class="panel" id="p-opp" role="tabpanel">
   <div id="whyOpp" hidden></div>
-  <div class="chips" style="margin-bottom:12px">
-    <button class="chip" id="fOppOrderer" type="button" aria-pressed="false"
-      title="공고를 직접 내는 발주처만 집계하고, 하청·중개업체로 분류된 곳은 빼고 봅니다">발주처만 보기</button>
-  </div>
-  <div class="kpis" id="oppKpis"></div>
 
-  <div class="eyebrow"><h2>이번 주 우선 접촉 리스트</h2><p>재활성화 후보 · 매출 감소 거래처 중 누적 매출이 큰 곳부터 10곳 — 눌러서 상세로 이동</p></div>
-  <div class="card" id="priorityContactCard">
-    <div id="priorityContactBody"><p class="formhint">불러오는 중…</p></div>
+  <div class="card" id="g2bDeadlineCard" style="border:1px solid #fecaca;background:#fff7f7;margin-bottom:20px">
+    <h3 id="g2bDeadlineTitle" style="display:flex;align-items:center;gap:8px;margin:0 0 10px"></h3>
+    <div id="g2bDeadlineBody"><p class="formhint">불러오는 중…</p></div>
   </div>
+
+  <div class="eyebrow"><h2>이번 주 우선 접촉 리스트</h2><p>카테고리를 눌러 펼쳐보세요 · 눌러서 거래처 상세로 이동</p></div>
+  <div id="priorityContactBody"><p class="formhint">불러오는 중…</p></div>
 
   <div class="eyebrow"><h2>리뷰 요청이 필요한 거래처</h2><p>최근 프로젝트가 끝났는데 아직 리뷰가 없는 곳 · 눌러서 바로 리뷰를 남길 수 있습니다</p>
     <button class="btn-ghost" id="reviewReqRefresh" type="button" style="margin-left:auto;flex:none">🔄 새로고침</button>
@@ -1435,17 +1441,11 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <div id="reviewReqBody"><p class="formhint">불러오는 중…</p></div>
   </div>
 
-  <div class="eyebrow"><h2>나라장터 마감 임박 공고</h2><p>3일 이내 마감되는 공고 · 눌러서 해당 거래처로 이동</p></div>
-  <div class="card" id="g2bDeadlineCard">
-    <div id="g2bDeadlineBody"><p class="formhint">불러오는 중…</p></div>
-  </div>
-
-  <div class="eyebrow"><h2>어디에서 새고, 어디에서 늘고 있나</h2>
-    <p>최근 3년(2024–2026)과 이전 3년(2021–2023)을 비교합니다</p></div>
+  <div class="eyebrow"><h2>매출 상세 분석</h2><p>최근 3년(2024–2026)과 이전 3년(2021–2023)을 비교합니다</p></div>
   <div class="grid g2">
     <div class="card">
       <h3>증감액 상위 거래처</h3>
-      <p class="sub">이전 3년 대비 최근 3년 매출 변화 · 위 8곳은 늘어난 곳, 아래 8곳은 줄어든 곳 · 누르면 상세가 열립니다</p>
+      <p class="sub">이전 3년 대비 최근 3년 매출 변화 · 위 4곳은 늘어난 곳, 아래 4곳은 줄어든 곳 · 누르면 상세가 열립니다</p>
       <div class="legend"><span><i style="background:var(--s1)"></i>증가</span>
         <span><i style="background:var(--s8)"></i>감소</span></div>
       <div class="dlist" id="oppDiv"></div>
@@ -1453,26 +1453,13 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <div class="card">
       <h3>기관 유형별 이탈 규모</h3>
       <p class="sub">재활성화 후보 + 휴면 거래처의 누적 매출 · 어느 시장에서 관계가 끊겼는지</p>
-      <div class="blist" id="oppSeg"></div>
+      <div class="donutwrap">
+        <svg class="donut" id="oppSegDonut" viewBox="0 0 240 240" role="img" aria-label="기관 유형별 이탈 규모"></svg>
+        <div class="dlegend" id="oppSegLegend"></div>
+      </div>
       <p class="cc-hint" id="oppSegNote"></p>
     </div>
   </div>
-
-  <div class="grid g2" style="margin-top:16px">
-    <div class="card">
-      <h3>재활성화 후보는 언제 멈췄나</h3>
-      <p class="sub">마지막 거래 이후 경과 개월 · 막대는 거래처 수, 값은 그 구간의 누적 매출</p>
-      <div class="blist" id="oppGap"></div>
-    </div>
-    <div class="card">
-      <h3>재활성화 후보가 사던 교육 분야</h3>
-      <p class="sub">이 분야로 다시 제안할 여지가 큽니다 · 막대는 누적 매출</p>
-      <div class="blist" id="oppField"></div>
-    </div>
-  </div>
-
-  <div class="eyebrow"><h2>접촉 후보 목록</h2><p>누르면 거래처 상세가 열립니다</p></div>
-  <div class="grid g2" id="oppGrid"></div>
 </section>
 
 <!-- ==================== 강사 풀 ==================== -->
@@ -2221,7 +2208,7 @@ function divbars(node,rows){
       '<span class="dtrack">'+(r.v<0
         ? '<i class="neg" style="right:50%;width:'+w.toFixed(2)+'%"></i>'
         : '<i class="pos" style="left:50%;width:'+w.toFixed(2)+'%"></i>')+'</span>'+
-      '<span class="dval '+(r.v<0?'n':'p')+'">'+r.text+'</span>';
+      '<span class="dval '+(r.v<0?'n':'p')+'">'+(r.v<0?'▼':'▲')+' '+r.text+'</span>';
     if(r.tip) b.setAttribute('data-tip',r.tip);
     if(r.click) b.addEventListener('click',r.click);
     node.appendChild(b);
@@ -2446,37 +2433,6 @@ function bindKpiWhy(hostSel, whySel, list){
   nodes.forEach((n,i)=>{
     const w=list[i] && list[i][4]; if(!w) return;
     n.addEventListener('click',()=>{ const ww=(typeof w==='function')?w():w; showWhy(whySel, ww); });
-  });
-}
-/* ---------- 이번 주 우선 접촉 리스트 (영업 기회 탭 맨 위 · 2026-09-23 요약 인사이트에서 이동) ----------
-   재활성화 후보(오래 끊긴 관계) + 매출 감소(최근 3년이 이전 3년보다 준 곳)를
-   한 목록으로 묶어 누적 매출이 큰 곳부터 10곳만 보여준다. 두 상태 모두
-   이미 영업 기회 탭에서 쓰는 c.st 분류를 그대로 재사용 — 새 집계 로직 없음. */
-function renderPriorityContacts(){
-  const box=$('#priorityContactBody'); if(!box) return;
-  const react=CL.filter(c=>c.st==='재활성화 후보').map(c=>({c, kind:'react'}));
-  const drop=CL.filter(c=>c.st==='감소').map(c=>({c, kind:'drop'}));
-  const list=react.concat(drop).sort((a,b)=>b.c.t-a.c.t).slice(0,10);
-  if(!list.length){ box.innerHTML='<p class="formhint">해당하는 거래처가 없습니다.</p>'; return; }
-  box.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+list.map((x,i)=>{
-    const c=x.c;
-    const badge = x.kind==='react'
-      ? '<span style="background:#eef2ff;color:#4338ca;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">재활성화 후보</span>'
-      : '<span style="background:#fff1f2;color:#be123c;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">매출 감소</span>';
-    const reason = x.kind==='react'
-      ? '마지막 거래 '+esc(ago(c.mo))
-      : '최근 3년 '+won(c.r3)+'원 (이전 3년 대비 −'+won(c.p3-c.r3)+'원)';
-    return '<button type="button" class="pc-row" data-id="'+esc(c.id)+'" '+
-      'style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid var(--line-c,#e5e7eb);border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;color:inherit">'+
-      '<span style="color:var(--muted-c);font-size:12.5px;width:1.4em;flex:none">'+(i+1)+'</span>'+
-      '<span style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.n)+'</span>'+
-      badge+
-      '<span style="color:var(--muted-c);font-size:12.5px;flex:none">'+reason+'</span>'+
-      '<span style="font-weight:600;font-size:13px;flex:none">누적 '+won(c.t)+'원</span>'+
-    '</button>';
-  }).join('')+'</div>';
-  box.querySelectorAll('.pc-row').forEach(btn=>{
-    btn.addEventListener('click',()=>openClient(btn.getAttribute('data-id')));
   });
 }
 function renderSummary(){
@@ -3317,8 +3273,13 @@ function initClientFilters(){
   fillSelect('#fField', fieldAgg, i=>i.k);
   fillSelect('#fDiv', divAgg, i=>i.k);
   fillSelect('#fPm', pmAgg.slice(0,120), i=>i.k+' ('+i.n+'건)');
-  $('#fState').innerHTML=stateAgg.map(s=>'<button class="chip" type="button" aria-pressed="false" data-v="'+
+  /* 상태 칩: 바(#fState)에는 성장·유지·감소를 빼고, 그 3개는 표 헤더의 "상태" 팝오버(#fStateHead)로 옮김.
+     둘 다 같은 마크업/클릭 로직을 쓰므로 헬퍼로 묶는다. */
+  const stateChipsHtml=list=>list.map(s=>'<button class="chip" type="button" aria-pressed="false" data-v="'+
     esc(s.k)+'">'+esc(s.k)+'<small>'+s.n+'</small></button>').join('');
+  const HEADER_STATES=['성장','유지','감소'];
+  $('#fState').innerHTML=stateChipsHtml(stateAgg.filter(s=>!HEADER_STATES.includes(s.k)));
+  $('#fStateHead').innerHTML=stateChipsHtml(stateAgg.filter(s=>s.k!=='신규 진입'));
   $('#fFav').addEventListener('click',()=>{
     F.fav=!F.fav;
     $('#fFav').setAttribute('aria-pressed', F.fav?'true':'false');
@@ -3339,11 +3300,15 @@ function initClientFilters(){
     $('#fHasG2b').setAttribute('aria-pressed', F.hasG2b?'true':'false');
     clearWhy(); drawClients(true);
   });
-  $('#fState').addEventListener('click',e=>{
+  const wireStateChips=sel=>$(sel).addEventListener('click',e=>{
     const b=e.target.closest('.chip'); if(!b) return;
     const v=b.dataset.v, on=b.getAttribute('aria-pressed')==='true';
     b.setAttribute('aria-pressed',on?'false':'true');
-    on?F.states.delete(v):F.states.add(v); clearWhy(); drawClients(true); });
+    on?F.states.delete(v):F.states.add(v);
+    /* 같은 상태가 바·헤더 양쪽에 있을 수 있으니(재활성화 후보·휴면) 눌린 표시를 서로 맞춘다 */
+    $$('#fState .chip[data-v="'+v+'"], #fStateHead .chip[data-v="'+v+'"]').forEach(x=>x.setAttribute('aria-pressed',on?'false':'true'));
+    clearWhy(); drawClients(true); });
+  wireStateChips('#fState'); wireStateChips('#fStateHead');
   const bind=(id,key,num)=>$(id).addEventListener('change',e=>{
     F[key]=num?+e.target.value:e.target.value; clearWhy(); drawClients(true); });
   bind('#fSeg','seg'); bind('#fSec','sec'); bind('#fField','field'); bind('#fDiv','div');
@@ -3417,7 +3382,7 @@ function fmtOptLabel(sel,v){
 function clearFilterKey(key){
   if(key.indexOf('state:')===0){
     const v=key.slice(6); F.states.delete(v);
-    const b=$('#fState .chip[data-v="'+v+'"]'); if(b) b.setAttribute('aria-pressed','false');
+    $$('#fState .chip[data-v="'+v+'"], #fStateHead .chip[data-v="'+v+'"]').forEach(b=>b.setAttribute('aria-pressed','false'));
   } else if(key==='q'){ F.q=''; $('#q').value=''; const qc=$('#qClear'); if(qc) qc.hidden=true; }
   else if(key==='fav'){ F.fav=false; const b=$('#fFav'); if(b) b.setAttribute('aria-pressed','false'); }
   else if(key==='hasOp'){ F.hasOp=false; const b=$('#fHasOp'); if(b) b.setAttribute('aria-pressed','false'); }
@@ -3481,7 +3446,7 @@ function initHeaderFilters(){
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHeaderFilters(null); });
 }
 function syncHeaderFilters(){
-  const map={rev:F.rev>0, years:F.years>0, pm:!!F.pm};
+  const map={state:F.states.size>0, rev:F.rev>0, years:F.years>0, pm:!!F.pm};
   $$('#tblClient th.fh').forEach(th=>th.classList.toggle('active', !!map[th.dataset.fh]));
 }
 function clearClientFilters(){
@@ -3494,7 +3459,7 @@ function clearClientFilters(){
   $('#q').value=''; const qc=$('#qClear'); if(qc) qc.hidden=true;
   ['#fSeg','#fSec','#fField','#fDiv','#fPm'].forEach(s=>$(s).value='');
   $('#fRev').value='0'; $('#fYears').value='0';
-  $$('#fState .chip').forEach(b=>b.setAttribute('aria-pressed','false'));
+  $$('#fState .chip, #fStateHead .chip').forEach(b=>b.setAttribute('aria-pressed','false'));
 }
 /* 검색어가 어디에 걸리는지 — 이름만이 아니라 PM·분야·유형·부문까지 본다 */
 const SFIELDS=[
@@ -3518,7 +3483,7 @@ function filterClients(){
     if(F.rev && c.t<F.rev) return false;
     if(F.years && c.ny<F.years) return false;
     if(F.states.size && !F.states.has(c.st)) return false;
-    if(F.hasOp && !(OPCOUNT[c.id]>0)) return false;
+    if(F.hasOp && !(OPCOUNT[c.n]>0)) return false;
     if(F.hasG2b && !(G2BCOUNT[c.id]>0)) return false;
     if(F.fav && !FAV.has(c.id)) return false;
     if(F.orderer && c.ordSt!=='orderer') return false;
@@ -3566,7 +3531,7 @@ function drawClients(reset){
   pgSlice(rows,cPg).forEach(c=>{
     const tr=el('tr','click'); tr.dataset.id=c.id;
     const fd=c.fd.slice(0,2).map(f=>esc(f[0])).join(' · ');
-    const oc=OPCOUNT[c.id]||0;
+    const oc=OPCOUNT[c.n]||0;
     const gc=G2BCOUNT[c.id]||0;
     tr.innerHTML=
       '<td class="favtd"><button class="fav" type="button" data-fav="'+esc(c.id)+'" '+
@@ -3609,7 +3574,7 @@ function goClient(o, why){
   if(o.div){F.div=o.div; $('#fDiv').value=o.div;}
   if(o.years){F.years=o.years; $('#fYears').value=String(o.years);}
   if(o.state){F.states.add(o.state);
-    const b=$('#fState .chip[data-v="'+o.state+'"]'); if(b)b.setAttribute('aria-pressed','true');}
+    $$('#fState .chip[data-v="'+o.state+'"], #fStateHead .chip[data-v="'+o.state+'"]').forEach(b=>b.setAttribute('aria-pressed','true'));}
   drawClients(true);
 }
 
@@ -3852,7 +3817,6 @@ function closeDrawer(){
 }
 
 /* ==================== 영업 기회 ==================== */
-let OPP_ORDERER_ONLY=false;
 /* ---------- 매년 반복되는 거래처 ----------
    큰 프로젝트는 보통 해마다 비슷한 시기에 공고가 올라온다. 같은 거래처에서 여러 해에 걸쳐
    프로젝트 시작 달이 몰려 있으면(±1개월 이내) "매년 반복" 패턴으로 보고, 다음에는 대략
@@ -3896,101 +3860,118 @@ function recurringClients(list){
   out.sort((a,b)=> b.years.length-a.years.length || b.rev-a.rev);
   return out;
 }
-function recurCard(rows){
-  return '<div class="card"><h3>매년 반복되는 거래처 <span style="color:var(--muted-c);font-weight:400">'+rows.length+'곳</span></h3>'+
-    '<p class="sub">여러 해에 걸쳐 프로젝트 시작 달이 몰려 있는 곳 · 다음 예상 시기가 가까운 순 · 나라장터 공고 이력이 아직 2026년치뿐이라 실제 계약 이력으로 추정</p>'+
-    (rows.length?'<div class="plist">'+rows.slice(0,20).map(r=>'<div class="pitem click" data-go="'+esc(r.c.id)+'">'+
+/* 카드 안 아이콘 — 앱의 다른 아이콘들과 같은 선 굵기(1.8)·라운드 캡의 단색 아웃라인 스타일. */
+const OI_ICON_REACT='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 0 1 12-4.9M17 10a7 7 0 0 1-12 4.9"/><path d="M15 3v3h-3M5 17v-3h3"/></svg>';
+const OI_ICON_DROP='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5l6 7 3-3 5 6"/><path d="M13 15h4v-4"/></svg>';
+const OI_ICON_UP='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15l6-7 3 3 5-6"/><path d="M13 5h4v4"/></svg>';
+const OI_ICON_PAUSE='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M7 4v12M13 4v12"/></svg>';
+const OI_ICON_NEW='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 7v6M7 10h6"/></svg>';
+const OI_ICON_SWAP='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h4l9 8h1M3 14h4l9-8h1"/><path d="M14 4l3 2-3 2M14 12l3 2-3 2"/></svg>';
+const OI_ICON_CLOCK='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg>';
+const OI_ICON_BELL='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3a4 4 0 0 0-4 4c0 4-1.5 5-1.5 5h11S14 11 14 7a4 4 0 0 0-4-4Z"/><path d="M8.5 15a1.7 1.7 0 0 0 3 0"/></svg>';
+function oiIcon(bg,fg,svg,size){
+  size=size||30;
+  return '<span style="flex:none;width:'+size+'px;height:'+size+'px;border-radius:999px;display:flex;align-items:center;'+
+    'justify-content:center;background:'+bg+';color:'+fg+'">'+svg+'</span>';
+}
+/* 우선 접촉 리스트 — 2열 탭 타일. 그룹 5개를 2열 타일로 먼저 보여주고, 하나를 누르면
+   그 아래 detail 칸에 실제 카드(들)가 펼쳐진다(다시 누르면 접힘, 다른 타일을 누르면
+   그쪽으로 바뀜 — 한 번에 하나만 열려 있음). */
+function pclTileHTML(gr){
+  return '<button type="button" class="pcl-tile" data-key="'+esc(gr.key)+'" data-bg="'+esc(gr.bg)+'" data-fg="'+esc(gr.fg)+'" '+
+    'style="display:flex;align-items:center;gap:12px;text-align:left;width:100%;padding:14px 16px;'+
+    'border:1px solid color-mix(in srgb,var(--border-c) 55%,transparent);border-radius:12px;background:var(--canvas);cursor:pointer;'+
+    'font:inherit;color:inherit;transition:border-color .15s,background .15s">'+
+    oiIcon(gr.bg,gr.fg,gr.icon,30)+
+    '<span style="flex:1;min-width:0;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(gr.label)+'</span>'+
+    '<span style="flex:none;font-weight:800;font-size:23px;color:'+gr.fg+';font-variant-numeric:tabular-nums">'+cnt(gr.count)+
+      '<span style="font-size:13px;font-weight:600;color:var(--muted-c);margin-left:3px">곳</span></span>'+
+    '<span class="pcl-caret" style="flex:none;color:var(--muted-c);font-size:18px;transition:transform .15s;display:inline-block">›</span>'+
+  '</button>';
+}
+function wirePclTiles(root, groups){
+  const tilesHost=root.querySelector('#pclTiles'), detail=root.querySelector('#pclDetail');
+  if(!tilesHost||!detail) return;
+  let openKey=null;
+  tilesHost.querySelectorAll('.pcl-tile').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const key=btn.dataset.key;
+      const willOpen = openKey!==key;
+      openKey = willOpen ? key : null;
+      tilesHost.querySelectorAll('.pcl-tile').forEach(b=>{
+        const on=b.dataset.key===openKey;
+        b.classList.toggle('active', on);
+        b.style.background = on ? b.dataset.bg : '';
+        const caret=b.querySelector('.pcl-caret'); if(caret) caret.style.transform = on?'rotate(90deg)':'';
+      });
+      if(!willOpen){ detail.innerHTML=''; return; }
+      const gr=groups.find(x=>x.key===openKey); if(!gr) return;
+      detail.innerHTML='<div class="grid g2">'+gr.html+'</div>';
+      detail.querySelectorAll('[data-go]').forEach(n=>n.addEventListener('click',()=>openClient(n.dataset.go)));
+      detail.querySelectorAll('[data-jump]').forEach(n=>n.addEventListener('click',()=>goClient({state:n.dataset.jump})));
+      wireOppMore(detail);
+      if(typeof gr.postRender==='function') gr.postRender();
+      detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+  });
+}
+function recurCard(rows,icon){
+  const id='opp'+Math.random().toString(36).slice(2,8);
+  const shown=rows.slice(0,20);
+  return '<div class="card"><h3 style="display:flex;align-items:center;gap:8px">'+(icon||'')+'<span>매년 반복되는 거래처 <span style="color:var(--muted-c);font-weight:400">'+rows.length+'곳</span></span></h3>'+
+    (rows.length?'<div class="plist" id="'+id+'">'+shown.map((r,i)=>'<div class="pitem click" data-go="'+esc(r.c.id)+'"'+(i>=OPP_VISIBLE?' hidden':'')+'>'+
       '<div><div class="pn">'+esc(r.c.n)+ordererBadge(r.c)+'</div><div class="pm"><span>'+esc(r.c.sg)+'</span>'+
       '<span>'+r.years.join(', ')+'년 '+r.month+'월 시작</span></div></div>'+
-      '<div class="pv">'+r.expectYear+'년 '+r.month+'월경 예상</div></div>').join('')+'</div>'
+      '<div class="pv">'+r.expectYear+'년 '+r.month+'월경 예상</div></div>').join('')+'</div>'+
+      (shown.length>OPP_VISIBLE?'<button class="more" type="button" data-more="'+id+'">더보기 ('+(shown.length-OPP_VISIBLE)+'곳 더)</button>':'')
       :'<div class="empty">해당 조건의 거래처가 없습니다.</div>')+'</div>';
 }
-function oppCard(title,sub,rows,colFn,jump){
+/* 카드 하나에 처음부터 20개를 다 펼쳐 보여주면 목록이 너무 길어져서,
+   처음엔 5개만 보여주고 "더보기"를 눌러야 나머지(최대 20개)가 펼쳐지도록 함. */
+const OPP_VISIBLE=5;
+function oppCard(title,sub,rows,colFn,jump,icon){
   const id='opp'+Math.random().toString(36).slice(2,8);
-  return '<div class="card"><h3>'+title+' <span style="color:var(--muted-c);font-weight:400">'+rows.length+'곳</span></h3>'+
+  const shown=rows.slice(0,20);
+  return '<div class="card"><h3 style="display:flex;align-items:center;gap:8px">'+(icon||'')+'<span>'+title+' <span style="color:var(--muted-c);font-weight:400">'+rows.length+'곳</span></span></h3>'+
     '<p class="sub">'+sub+'</p>'+
-    (rows.length?'<div class="plist">'+rows.slice(0,20).map(c=>'<div class="pitem click" data-go="'+esc(c.id)+'">'+
+    (rows.length?'<div class="plist" id="'+id+'">'+shown.map((c,i)=>'<div class="pitem click" data-go="'+esc(c.id)+'"'+(i>=OPP_VISIBLE?' hidden':'')+'>'+
       '<div><div class="pn">'+esc(c.n)+ordererBadge(c)+'</div><div class="pm"><span>'+esc(c.sg)+'</span>'+
       (c.pm.length?'<span>PM '+esc(c.pm[0][0])+'</span>':'')+
       (c.fd.length?'<span>'+esc(c.fd[0][0])+'</span>':'')+'<span>'+ago(c.mo)+'</span></div></div>'+
       '<div class="pv">'+colFn(c)+'</div></div>').join('')+'</div>'+
+      (shown.length>OPP_VISIBLE?'<button class="more" type="button" data-more="'+id+'">더보기 ('+(shown.length-OPP_VISIBLE)+'곳 더)</button>':'')+
       (jump&&rows.length>20?'<button class="more" data-jump="'+esc(jump)+'">전체 '+rows.length+'곳을 거래처 찾기에서 보기</button>':'')
       :'<div class="empty">해당 조건의 거래처가 없습니다.</div>')+'</div>';
 }
+/* [data-more] 버튼 — 이미 그려진(최대 20개) 항목의 hidden만 켜고 끈다.
+   접으면 스크롤 위치가 카드 밖으로 튀지 않게 카드로 되돌린다. */
+function wireOppMore(root){
+  root.querySelectorAll('[data-more]').forEach(btn=>btn.addEventListener('click',()=>{
+    const list=document.getElementById(btn.dataset.more); if(!list) return;
+    const items=Array.from(list.querySelectorAll('.pitem'));
+    const expanding=items.some(it=>it.hidden);
+    items.forEach((it,i)=>{ it.hidden = expanding ? false : i>=OPP_VISIBLE; });
+    btn.textContent = expanding ? '접기' : '더보기 ('+(items.length-OPP_VISIBLE)+'곳 더)';
+    if(!expanding) btn.closest('.card').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }));
+}
 function renderOpp(){
-  /* "발주처만 보기"를 켜면 하청·중개업체로 분류된 곳은 모든 영업 기회 목록에서 제외한다 */
-  const oppCL = OPP_ORDERER_ONLY ? CL.filter(c=>c.ordSt==='orderer') : CL;
+  const oppCL = CL;
   const react=oppCL.filter(c=>c.st==='재활성화 후보').sort((a,b)=>b.t-a.t);
   const sleep=oppCL.filter(c=>c.st==='휴면'&&c.t>=5e8).sort((a,b)=>b.t-a.t);
   const grow=oppCL.filter(c=>c.r3>c.p3&&c.p3>0).sort((a,b)=>(b.r3-b.p3)-(a.r3-a.p3));
   const drop=oppCL.filter(c=>c.p3>0&&c.r3<c.p3*0.7&&c.mo<=24).sort((a,b)=>(b.p3-b.r3)-(a.p3-a.r3));
   const fresh=oppCL.filter(c=>c.fy>=2025).sort((a,b)=>b.t-a.t);
   const cross=oppCL.filter(c=>c.fd.length===1&&c.t>=3e8&&c.mo<=18).sort((a,b)=>b.t-a.t);
-  /* ---- 인사이트 지표 ---- */
-  const reactRev=react.reduce((s,c)=>s+c.t,0), sleepAll=oppCL.filter(c=>c.st==='휴면');
-  const sleepRev=sleepAll.reduce((s,c)=>s+c.t,0);
-  const growSum=grow.reduce((s,c)=>s+(c.r3-c.p3),0), dropSum=drop.reduce((s,c)=>s+(c.p3-c.r3),0);
-  const oppKpiList=[
-    ['재활성화 후보', cnt(react.length)+'<small>곳</small>', '누적 '+won(reactRev)+'원', 1,
-      {title:'재활성화 후보 '+cnt(react.length)+'곳', rows:[
-        ['어떻게 골랐나','마지막 프로젝트 시작일이 기준일('+D.meta.asof+')로부터 <b>19~36개월 전</b>인 거래처입니다.'],
-        ['왜 그 구간인가','18개월 이내는 아직 거래가 이어지는 것으로 보고, 36개월을 넘기면 <b>휴면</b>으로 따로 분류합니다.'],
-        ['규모', calcHTML([
-          {k:'해당 거래처', v:cnt(react.length)+'곳'},
-          {k:'이들의 누적 매출', v:won(reactRev)+'원'},
-        ])],
-        ['목록','아래 「재활성화 후보」 카드에서 전체 명단을 볼 수 있습니다.<br>'+goHere('#oppGrid','명단으로 이동')],
-      ]}],
-    ['휴면', cnt(sleepAll.length)+'<small>곳</small>', '누적 '+won(sleepRev)+'원', 0,
-      {title:'휴면 '+cnt(sleepAll.length)+'곳', rows:[
-        ['어떻게 골랐나','마지막 거래로부터 <b>36개월</b>을 넘겨 관계가 끊긴 것으로 보는 거래처입니다.'],
-        ['규모', calcHTML([
-          {k:'휴면 거래처', v:cnt(sleepAll.length)+'곳'},
-          {k:'누적 매출', v:won(sleepRev)+'원'},
-        ])],
-        ['카드에는','이 중 누적 매출 5억원 이상인 곳만 「큰 거래가 멈춘 곳」 카드에 우선순위로 보여줍니다.<br>'+goHere('#oppGrid','명단으로 이동')],
-      ]}],
-    ['성장', cnt(grow.length)+'<small>곳</small>', '<span class="up">+'+won(growSum)+'원</span>', 0,
-      {title:'성장하는 거래처 '+cnt(grow.length)+'곳', rows:[
-        ['어떻게 골랐나','최근 3년(2024–2026) 매출이 이전 3년(2021–2023)보다 <b>늘어난</b> 거래처입니다.'],
-        ['늘어난 합계', calcHTML([
-          {k:'최근 3년 합계 − 이전 3년 합계', v:'전체 '+cnt(grow.length)+'곳 합산'},
-          {k:'증가액', v:'+'+won(growSum)+'원', res:1},
-        ])],
-        ['목록','증가액이 큰 순으로 「성장하는 거래처」 카드와 위쪽 증감액 그래프에 표시됩니다.<br>'+goHere('#oppDiv','그래프로 이동')],
-      ]}],
-    ['감소', cnt(drop.length)+'<small>곳</small>', '<span class="dn">−'+won(dropSum)+'원</span>', 0,
-      {title:'줄어드는 거래처 '+cnt(drop.length)+'곳', rows:[
-        ['어떻게 골랐나','최근 3년 매출이 이전 3년의 <b>70% 미만</b>이면서, 최근 24개월 안에는 거래가 있던 곳입니다.'],
-        ['감소 합계', calcHTML([
-          {k:'이전 3년 대비 감소액(합계)', v:'−'+won(dropSum)+'원', res:1},
-        ])],
-        ['목록','감소액이 큰 순으로 「줄어드는 거래처」 카드와 위쪽 증감액 그래프에 표시됩니다.<br>'+goHere('#oppDiv','그래프로 이동')],
-      ]}],
-    ['신규 진입', cnt(fresh.length)+'<small>곳</small>', '2025년 이후 첫 거래', 0,
-      {title:'신규 진입 거래처 '+cnt(fresh.length)+'곳', rows:[
-        ['어떻게 골랐나','<b>2025년 이후</b> 처음 거래가 시작된 거래처입니다.'],
-        ['눈여겨볼 점','두 번째 과제로 이어지는지가 관건입니다 — 아직 프로젝트가 1건뿐인 곳이 많습니다.'],
-        ['목록','「신규 진입 거래처」 카드에서 전체 명단을 볼 수 있습니다.<br>'+goHere('#oppGrid','명단으로 이동')],
-      ]}],
-    ['교차판매 후보', cnt(cross.length)+'<small>곳</small>', '한 분야만 수행 중', 0,
-      {title:'교차판매 후보 '+cnt(cross.length)+'곳', rows:[
-        ['어떻게 골랐나','최근 18개월 안에 거래가 있고, 지금까지 교육 분야가 <b>한 가지뿐</b>이며, 누적 매출 3억원 이상인 곳입니다.'],
-        ['왜 중요한가','이미 신뢰가 쌓인 거래처에 다른 분야를 제안하면 성사 가능성이 높습니다.'],
-        ['목록','「교차판매 후보」 카드에서 전체 명단을 볼 수 있습니다.<br>'+goHere('#oppGrid','명단으로 이동')],
-      ]}],
-  ];
-  $('#oppKpis').innerHTML=kpiHTML(oppKpiList);
-  bindKpiWhy('#oppKpis','#whyOpp', oppKpiList);
 
-  /* ---- 증감액 상위 (다이버징) ---- */
-  const divRows=grow.slice(0,8).map(c=>({
+  /* ---- 증감액 상위 (다이버징) — 늘어난 4곳 + 줄어든 4곳 ---- */
+  const divRows=grow.slice(0,4).map(c=>({
       label:c.n, v:c.r3-c.p3, text:'+'+won(c.r3-c.p3),
       tip:'<b>'+esc(c.n)+'</b><br>이전 3년 '+won(c.p3)+'원 → 최근 3년 <b>'+won(c.r3)+'원</b><br>'+
         '<span style="opacity:.75">'+esc(c.sg)+' · '+c.pc+'건</span>',
       click:()=>openClient(c.id)
     }))
-    .concat(drop.slice(0,8).map(c=>({
+    .concat(drop.slice(0,4).map(c=>({
       label:c.n, v:-(c.p3-c.r3), text:'−'+won(c.p3-c.r3),
       tip:'<b>'+esc(c.n)+'</b><br>이전 3년 '+won(c.p3)+'원 → 최근 3년 <b>'+won(c.r3)+'원</b><br>'+
         '<span style="opacity:.75">'+esc(c.sg)+' · 최근 거래 '+ago(c.mo)+'</span>',
@@ -3998,60 +3979,76 @@ function renderOpp(){
     })));
   divbars($('#oppDiv'), divRows);
 
-  /* ---- 기관 유형별 이탈 규모 ---- */
+  /* ---- 기관 유형별 이탈 규모 — 도넛 ---- */
   const lost=CL.filter(c=>c.st==='휴면'||c.st==='재활성화 후보');
   const segLost=(()=>{ const m=new Map();
     lost.forEach(c=>{ const o=m.get(c.sg)||{n:0,rev:0}; o.n++; o.rev+=c.t; m.set(c.sg,o); });
     return Array.from(m,([k,v])=>({k,...v})).sort((a,b)=>b.rev-a.rev); })();
   const segTot={}; segAgg.forEach(s=>segTot[s.k]=s.rev);
-  bars($('#oppSeg'), segLost.map(s=>({
-    label:s.k, v:s.rev, text:ok1(s.rev)+'<s>억</s>', color:'var(--s2)',
+  donut($('#oppSegDonut'), $('#oppSegLegend'), segLost.map(s=>({
+    label:s.k, v:Math.round(s.rev/EOK),
     tip:'<b>'+esc(s.k)+'</b><br>휴면·재활성화 <b>'+cnt(s.n)+'</b>곳<br>누적 매출 <b>'+won(s.rev)+
-      '원</b><br>이 유형 전체 매출의 <b>'+pct(s.rev,segTot[s.k]||1).toFixed(0)+'%</b>',
-    click:()=>goClient({seg:s.k})
-  })));
+      '원</b><br>이 유형 전체 매출의 <b>'+pct(s.rev,segTot[s.k]||1).toFixed(0)+'%</b>'
+  })), {unit:'억원', suffix:'억'});
   const lostRev=lost.reduce((s,c)=>s+c.t,0);
   $('#oppSegNote').innerHTML='휴면·재활성화 후보 '+cnt(lost.length)+'곳 합계 '+won(lostRev)+
     '원 · 전체의 '+pct(lostRev,TOT).toFixed(1)+'%';
 
-  /* ---- 재활성화 후보 경과 구간 ---- */
+  /* ---- 재활성화 후보 경과 구간·교육 분야 — "재활성화 후보" 타일을 열 때만 옆에 도넛 2개로 보여줌 ---- */
   const gaps=[[19,24,'19–24개월'],[25,30,'25–30개월'],[31,36,'31–36개월']];
-  bars($('#oppGap'), gaps.map((g2,i)=>{
+  const gapRows=gaps.map((g2,i)=>{
     const set=react.filter(c=>c.mo>=g2[0]&&c.mo<=g2[1]);
     const rev=set.reduce((s,c)=>s+c.t,0);
-    return { label:g2[2], v:set.length, text:ok1(rev)+'<s>억</s>', color:['#2a78d6','#5598e7','#86b6ef'][i],
+    return { label:g2[2], v:set.length, color:['#2a78d6','#5598e7','#86b6ef'][i],
       tip:'<b>'+g2[2]+' 경과</b><br>거래처 <b>'+cnt(set.length)+'</b>곳<br>누적 매출 <b>'+won(rev)+'원</b>' };
-  }));
-
-  /* ---- 재활성화 후보의 교육 분야 ---- */
+  });
   const rf=(()=>{ const m=new Map();
     react.forEach(c=>c.fd.forEach(fd=>{ const o=m.get(fd[0])||{n:0,rev:0};
       o.n+=fd[1]; o.rev+=c.t*(fd[1]/Math.max(1,c.pc)); m.set(fd[0],o); }));
     return Array.from(m,([k,v])=>({k,...v})).sort((a,b)=>b.rev-a.rev).slice(0,8); })();
-  bars($('#oppField'), rf.map(x=>({
-    label:x.k, v:x.rev, text:ok1(x.rev)+'<s>억</s>', color:'var(--s3)',
+  const fieldRows=rf.map(x=>({
+    label:x.k, v:Math.round(x.rev/EOK),
     tip:'<b>'+esc(x.k)+'</b><br>재활성화 후보가 수행한 <b>'+cnt(Math.round(x.n))+'</b>건<br>'+
-      '해당 거래처 누적 매출 배분 <b>'+won(x.rev)+'원</b>',
-    click:()=>goClient({field:x.k, state:'재활성화 후보'})
-  })));
+      '해당 거래처 누적 매출 배분 <b>'+won(x.rev)+'원</b>'
+  }));
+  const reactExtraHTML=
+    '<div class="card"><h3>재활성화 후보 마지막 거래일</h3>'+
+      '<div class="donutwrap"><svg class="donut" id="reactGapDonut" viewBox="0 0 240 240" role="img" aria-label="재활성화 후보 마지막 거래일 분포"></svg>'+
+      '<div class="dlegend" id="reactGapLegend"></div></div></div>'+
+    '<div class="card"><h3>재활성화 후보 주요 거래 분야</h3>'+
+      '<div class="donutwrap"><svg class="donut" id="reactFieldDonut" viewBox="0 0 240 240" role="img" aria-label="재활성화 후보 주요 거래 분야 분포"></svg>'+
+      '<div class="dlegend" id="reactFieldLegend"></div></div></div>';
 
-  const g=$('#oppGrid');
+  const recur=recurringClients(oppCL);
+  const pclGroups=[
+    {key:'drop', label:'매출 감소', icon:OI_ICON_DROP, bg:'#fff1f2', fg:'#be123c', count: sleep.length+drop.length,
+      html: oppCard('큰 거래가 멈춘 곳','3년 넘게 거래가 없지만 누적 5억원 이상 · 조직 개편이나 담당자 교체를 먼저 확인하세요',
+          sleep, c=>'누적 '+won(c.t), '휴면', oiIcon('#fff1f2','#be123c',OI_ICON_PAUSE,22))+
+        oppCard('줄어드는 거래처','최근 3년이 이전 3년의 70% 미만이면서 2년 안에 거래가 있던 곳 · 감소액 순 · 이탈 방어 대상',
+          drop, c=>'<span class="dn">−'+won(c.p3-c.r3)+'</span>', '감소', oiIcon('#fff1f2','#be123c',OI_ICON_DROP,22))},
+    {key:'react', label:'재활성화 후보', icon:OI_ICON_REACT, bg:'#eef2ff', fg:'#4338ca', count: react.length,
+      html: oppCard('재활성화 후보','마지막 거래가 19~36개월 전 · 누적 매출 많은 순 · 아직 관계가 살아 있을 가능성이 높은 구간',
+          react, c=>'누적 '+won(c.t), '재활성화 후보', oiIcon('#eef2ff','#4338ca',OI_ICON_REACT,22))+reactExtraHTML,
+      postRender: function(){
+        donut($('#reactGapDonut'), $('#reactGapLegend'), gapRows, {unit:'곳', suffix:'곳'});
+        donut($('#reactFieldDonut'), $('#reactFieldLegend'), fieldRows, {unit:'억원', suffix:'억'});
+      }},
+    {key:'recur', label:'주기적 거래처', icon:OI_ICON_CLOCK, bg:'#ecfeff', fg:'#0e7490', count: recur.length,
+      html: recurCard(recur, oiIcon('#ecfeff','#0e7490',OI_ICON_CLOCK,22))},
+    {key:'new', label:'신규 거래처', icon:OI_ICON_NEW, bg:'#ecfdf5', fg:'#047857', count: fresh.length+grow.length,
+      html: oppCard('신규 진입 거래처','2025년 이후 첫 거래 · 두 번째 과제로 이어가야 하는 곳',
+          fresh, c=>'누적 '+won(c.t), '신규 진입', oiIcon('#ecfdf5','#047857',OI_ICON_NEW,22))+
+        oppCard('성장하는 거래처','최근 3년(2024–2026)이 이전 3년(2021–2023)보다 늘어난 곳 · 증가액 순 · 확대 제안 대상',
+          grow, c=>'<span class="up">+'+won(c.r3-c.p3)+'</span>', '성장', oiIcon('#ecfdf5','#047857',OI_ICON_UP,22))},
+    {key:'cross', label:'다른 분야 제안 가능 거래처', icon:OI_ICON_SWAP, bg:'#f5f3ff', fg:'#6d28d9', count: cross.length,
+      html: oppCard('교차판매 후보','최근 18개월 안에 거래가 있지만 교육 분야가 한 가지뿐이고 누적 3억원 이상 · 다른 분야 제안 여지',
+          cross, c=>'누적 '+won(c.t), null, oiIcon('#f5f3ff','#6d28d9',OI_ICON_SWAP,22))},
+  ];
+  const g=$('#priorityContactBody');
   g.innerHTML=
-    oppCard('재활성화 후보','마지막 거래가 19~36개월 전 · 누적 매출 많은 순 · 아직 관계가 살아 있을 가능성이 높은 구간',
-      react, c=>'누적 '+won(c.t), '재활성화 후보')+
-    oppCard('큰 거래가 멈춘 곳','3년 넘게 거래가 없지만 누적 5억원 이상 · 조직 개편이나 담당자 교체를 먼저 확인하세요',
-      sleep, c=>'누적 '+won(c.t), '휴면')+
-    oppCard('성장하는 거래처','최근 3년(2024–2026)이 이전 3년(2021–2023)보다 늘어난 곳 · 증가액 순 · 확대 제안 대상',
-      grow, c=>'<span class="up">+'+won(c.r3-c.p3)+'</span>', '성장')+
-    oppCard('줄어드는 거래처','최근 3년이 이전 3년의 70% 미만이면서 2년 안에 거래가 있던 곳 · 감소액 순 · 이탈 방어 대상',
-      drop, c=>'<span class="dn">−'+won(c.p3-c.r3)+'</span>', '감소')+
-    oppCard('신규 진입 거래처','2025년 이후 첫 거래 · 두 번째 과제로 이어가야 하는 곳',
-      fresh, c=>'누적 '+won(c.t), '신규 진입')+
-    oppCard('교차판매 후보','최근 18개월 안에 거래가 있지만 교육 분야가 한 가지뿐이고 누적 3억원 이상 · 다른 분야 제안 여지',
-      cross, c=>'누적 '+won(c.t), null)+
-    recurCard(recurringClients(oppCL));
-  g.querySelectorAll('[data-go]').forEach(n=>n.addEventListener('click',()=>openClient(n.dataset.go)));
-  g.querySelectorAll('[data-jump]').forEach(n=>n.addEventListener('click',()=>goClient({state:n.dataset.jump})));
+    '<div class="grid g2" id="pclTiles">'+pclGroups.map(pclTileHTML).join('')+'</div>'+
+    '<div id="pclDetail" style="margin-top:16px"></div>';
+  wirePclTiles(g, pclGroups);
 }
 
 /* ==================== 강사 풀 ==================== */
@@ -5174,27 +5171,46 @@ function renderOpBox(){
 /* "나라장터 마감 임박 공고" 카드 — 개발자 제안 중 하나로 추가(2026-09-23).
    위치는 처음엔 요약 인사이트 탭이었으나 2026-09-23 영업 기회 탭으로 이동. 임박 기준은 "3일 이내"(사용자 선택) —
    기존에 목록 화면에서 D-1~D-3/오늘 마감을 강조(.wn 클래스)하던 기준과 동일하게 맞췄다. */
+const G2B_DEADLINE_VISIBLE=4;
 function renderG2bDeadlineAlerts(){
   const box=$('#g2bDeadlineBody'); if(!box) return;
   const items=(G2BALL||[]).map(g=>({g, dday:ddayLabel(g.closeDt)}))
     .filter(r=>r.g.cid && r.dday && (r.dday==='오늘 마감' || /^D-[1-3]$/.test(r.dday)))
-    .sort((a,b)=>new Date(a.g.closeDt)-new Date(b.g.closeDt))
-    .slice(0,10);
+    .sort((a,b)=>new Date(a.g.closeDt)-new Date(b.g.closeDt));
+  const titleEl=$('#g2bDeadlineTitle');
+  if(titleEl) titleEl.innerHTML=oiIcon('#fef2f2','#b91c1c',OI_ICON_BELL,26)+
+    '<span>나라장터 마감 임박 공고</span>'+
+    '<span style="font-weight:800;color:#b91c1c">'+cnt(items.length)+'건</span>';
   if(!items.length){ box.innerHTML='<p class="formhint">3일 이내 마감되는 나라장터 공고가 없습니다.</p>'; return; }
-  box.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+items.map(r=>{
+  box.innerHTML='<div class="grid g2" style="gap:8px" id="g2bDeadlineList">'+items.map((r,i)=>{
     const g=r.g;
     const warn = r.dday==='오늘 마감' || r.dday==='D-1';
-    const badge='<span style="background:'+(warn?'#fef2f2':'#fff7ed')+';color:'+(warn?'#b91c1c':'#c2410c')+';border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">'+esc(r.dday)+'</span>';
-    return '<button type="button" class="g2bd-row" data-id="'+esc(g.cid)+'" '+
-      'style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid var(--line-c,#e5e7eb);border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;color:inherit">'+
-      badge+
-      '<span style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.title||'(제목 없음)')+'</span>'+
-      '<span style="color:var(--muted-c);font-size:12.5px;flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.cn||'')+'</span>'+
+    const iconBg=warn?'#fef2f2':'#fff7ed', iconFg=warn?'#b91c1c':'#c2410c';
+    const badge='<span style="background:'+iconBg+';color:'+iconFg+';border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap">'+esc(r.dday)+'</span>';
+    return '<button type="button" class="g2bd-row" data-id="'+esc(g.cid)+'"'+(i>=G2B_DEADLINE_VISIBLE?' hidden':'')+' '+
+      'style="display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:none;border:1px solid var(--line-c,#e5e7eb);border-radius:10px;padding:10px 12px;cursor:pointer;font:inherit;color:inherit">'+
+      oiIcon(iconBg,iconFg,OI_ICON_BELL)+
+      '<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">'+
+        '<span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.title||'(제목 없음)')+'</span>'+
+        '<span style="display:flex;align-items:center;gap:6px;min-width:0">'+
+          badge+
+          '<span style="color:var(--muted-c);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.cn||'')+'</span>'+
+        '</span>'+
+      '</span>'+
     '</button>';
-  }).join('')+'</div>';
+  }).join('')+'</div>'+
+    (items.length>G2B_DEADLINE_VISIBLE?'<button class="more" type="button" id="g2bDeadlineMore">더보기 ('+(items.length-G2B_DEADLINE_VISIBLE)+'건 더)</button>':'');
   box.querySelectorAll('.g2bd-row').forEach(btn=>{
     const id=btn.getAttribute('data-id');
     if(id) btn.addEventListener('click',()=>openClient(id));
+  });
+  const moreBtn=$('#g2bDeadlineMore');
+  if(moreBtn) moreBtn.addEventListener('click',()=>{
+    const list=$('#g2bDeadlineList');
+    const rows=Array.from(list.querySelectorAll('.g2bd-row'));
+    const expanding=rows.some(r=>r.hidden);
+    rows.forEach((r,i)=>{ r.hidden = expanding ? false : i>=G2B_DEADLINE_VISIBLE; });
+    moreBtn.textContent = expanding ? '접기' : '더보기 ('+(rows.length-G2B_DEADLINE_VISIBLE)+'건 더)';
   });
 }
 function ddayLabel(closeDt){
@@ -5773,7 +5789,7 @@ addEventListener('kma-signed-out',()=>{
     clearClientFilters(); cSort={k:'t',dir:-1};
     $$('#tblClient th.s').forEach(x=>x.classList.remove('asc','desc'));
     drawClients(true);
-    iClear(); syncIChips(); syncISeg(); drawInst(true);
+    iClear(); syncISel(); drawInst(true);
     goTab('p-sum'); syncTabFocus();
     reloadAccountScoped();
   }catch(e){}
@@ -5801,15 +5817,9 @@ $('#asof').textContent='2019–2026 · 기준 '+D.meta.asof;
 
 renderSummary();
 renderFutureInsights();
-renderPriorityContacts();
 renderOverview();
 initClientFilters();
 drawClients(true);
-$('#fOppOrderer').addEventListener('click',()=>{
-  OPP_ORDERER_ONLY=!OPP_ORDERER_ONLY;
-  $('#fOppOrderer').setAttribute('aria-pressed', OPP_ORDERER_ONLY?'true':'false');
-  renderOpp();
-});
 renderOpp();
 renderInst();
 initInst();
