@@ -1141,7 +1141,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <p id="js-check" class="login-err-hard">이 화면에서 자바스크립트가 실행되지 않았습니다.
       파일을 내려받아 브라우저에서 직접 열어 주세요.</p>
     <p class="login-hint">
-      부서별 계정으로 로그인하세요. 계정 정보는 담당자에게 문의해 주세요.<br>
+      부서별 계정으로 로그인하세요.<br>
       <button type="button" class="linkq" id="lg-demo">공용 계정으로 들어가기</button>
     </p>
   </form>
@@ -1714,7 +1714,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 <aside class="chatpanel" id="chatPanel" hidden role="dialog" aria-modal="false" aria-label="사용 가이드">
   <div class="chat-head">
     <span class="ci"><svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5C3 5.9 6.6 3 11 3s8 2.9 8 6.5S15.4 16 11 16c-.8 0-1.6-.1-2.3-.3L4.5 17.5l1-3.3C3.9 13 3 11.3 3 9.5Z"/></svg></span>
-    <div><b>KMA 보드 가이드</b><small>궁금한 걸 눌러보세요 · 사람이 아닌 안내입니다</small></div>
+    <div><b>KMA 보드 가이드</b></div>
     <button class="dclose" id="chatClose" type="button" aria-label="닫기">✕</button>
   </div>
   <div class="chat-body" id="chatBody"></div>
@@ -2813,42 +2813,42 @@ function renderFutureInsights(){
   ];
 
   const futureFacts=[
-    ['up', cnt(reactSignal.length)+'곳', '영업 기회 신호',
+    ['up', cnt(reactSignalFull.length)+'곳', '영업 기회 신호',
       reactSignal.length ? miniList(reactSignal.map(c=>({label:c.n, text:(openByClient[c.id]||[]).length+'건 공고'}))) : '',
       reactSignalFull.length
         ? '한동안 조용했던 거래처 '+cnt(reactSignalFull.length)+'곳에 방금 새 나라장터 공고가 떴어요.'
         : '지금은 조용했던 거래처 중 새 공고가 뜬 곳이 없어요. 조건에 맞는 곳이 생기면 여기 표시돼요.',
       ()=>{ if(reactSignal[0]) openClient(reactSignal[0].id); }],
 
-    ['', cnt(prepTop.length)+'건', '지금 준비하면 늦지 않는 공고',
+    ['', cnt(prepDedupFull.length)+'건', '지금 준비하면 늦지 않는 공고',
       prepTop.length ? miniList(prepTop.map(r=>({label:r.c.n, text:fmtDay(r.days)}))) : '',
       prepDedupFull.length
         ? '마감까지 4~21일 남아 제안서를 준비할 시간이 있는 신규 매칭 공고예요.'
         : '지금은 준비 시간이 여유로운(4~21일) 신규 매칭 공고가 없어요.',
       ()=>{ if(prepTop[0]) openClient(prepTop[0].c.id); }],
 
-    ['up', cnt(newFieldTop.length)+'곳', '도전해볼 신규 분야',
+    ['up', cnt(newFieldDedupFull.length)+'곳', '도전해볼 신규 분야',
       newFieldTop.length ? miniList(newFieldTop.map(r=>({label:r.c.n, text:esc(r.cat)}))) : '',
       newFieldDedupFull.length
         ? '기존 거래처가 우리가 아직 안 해본 분야의 공고를 냈어요 — 새 분야 제안 기회예요.'
         : '지금은 기존 사업부문과 다른 분야의 신규 공고가 없어요.',
       ()=>{ if(newFieldTop[0]) openClient(newFieldTop[0].c.id); }],
 
-    ['up', cnt(crossSell.length)+'곳', '지금이 교차 제안 타이밍',
+    ['up', cnt(crossSellFull.length)+'곳', '지금이 교차 제안 타이밍',
       crossSell.length ? miniList(crossSell.map(c=>({label:c.n, text:c.ny+'년째'}))) : '',
       crossSellFull.length
         ? '4년 이상 함께한 우수 거래처가 지금 활발히 공고를 내고 있어요 — 교차 제안을 해보세요.'
         : '지금은 오래된 우수 거래처 중 활발히 공고를 내는 곳이 없어요.',
       ()=>{ if(crossSell[0]) openClient(crossSell[0].id); }],
 
-    ['', cnt(recurringTop.length)+'곳', '내년 시즌 미리 준비하기',
+    ['', cnt(recurringRows.length)+'곳', '내년 시즌 미리 준비하기',
       recurringTop.length ? miniList(recurringTop.map(r=>({label:r.c.n, text:r.diffDays+'일 후 예상'}))) : '',
       recurringRows.length
         ? '매년 비슷한 시기에 공고를 내온 거래처인데, 아직 올해 건 공고가 안 떴어요. 먼저 준비해보세요.'
         : '지금은 60일 안에 시즌이 돌아오는 반복 패턴 거래처가 없어요.',
       ()=>{ if(recurringTop[0]) openClient(recurringTop[0].c.id); }],
 
-    ['dn', cnt(multiRows.length)+'곳', '동시 진행 중인 공고',
+    ['dn', cnt(multiFull.length)+'곳', '동시 진행 중인 공고',
       multiRows.length ? miniList(multiRows.map(r=>({label:r.c.n, text:r.n+'건 동시 진행'}))) : '',
       multiFull.length
         ? '이 거래처들은 지금 공고를 2건 이상 동시에 진행하고 있어요 — 종합 제안을 검토해보세요.'
