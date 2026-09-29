@@ -224,8 +224,6 @@ button.fact:hover{background:var(--surface-c)}
 .fact .f-d{font-size:13px;line-height:20px;color:var(--body-c)}
 .fact{gap:4px}
 .fact .f-t{margin-bottom:2px}
-.fact .f-dept{font-size:12.5px;line-height:18px;color:var(--muted-c);margin-top:4px;padding-top:8px;border-top:1px solid var(--border-c)}
-.fact .f-dept b{color:var(--fg);font-weight:600}
 .f-head{display:flex;align-items:center;gap:10px;margin-bottom:2px}
 .f-head .f-t{margin-bottom:0}
 .mini-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 2px}
@@ -233,7 +231,7 @@ button.fact:hover{background:var(--surface-c)}
 .mt-item b{display:block;font-size:13px;font-weight:600;color:var(--fg);overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .mt-item span{display:block;font-size:13px;font-weight:700;color:var(--fg);margin-top:2px}
-.f-more{display:block;font-size:12.5px;color:var(--muted-c);margin-top:2px}
+.f-more{display:block;font-size:12.5px;color:var(--muted-c);margin-top:4px;padding-top:8px;border-top:1px solid var(--border-c)}
 button.fact:hover .f-more{color:var(--primary)}
 
 /* ---------- 막대 ---------- */
@@ -1091,22 +1089,24 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 .rf-cname{font-weight:700;font-size:14px;cursor:pointer}
 .rf-cname:hover{color:var(--primary)}
 .rf-ccount{font-size:12px;color:var(--muted-c);white-space:nowrap}
-.rf-slot{min-height:150px;position:relative;padding:0 28px}
-.rf-cmt{position:absolute;left:28px;right:28px;top:0;padding-top:4px;opacity:1;transition:opacity .25s ease}
+.rf-slot{height:168px;position:relative;padding:0 28px}
+.rf-cmt{position:absolute;left:28px;right:28px;top:0;padding-top:4px;opacity:1;transition:opacity .25s ease;overflow:hidden}
 .rf-cmt.hide{opacity:0;pointer-events:none}
-.rf-who{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rf-who{display:flex;align-items:center;gap:8px;margin-bottom:6px;height:28px}
 .rf-avatar{width:28px;height:28px;border-radius:50%;flex:none}
-.rf-who b{font-size:13px}
-.rf-who span.dept{font-size:11.5px;color:var(--muted-c)}
+.rf-who b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:88px}
+.rf-who span.dept{font-size:11.5px;color:var(--muted-c);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:72px}
 .rf-new{background:var(--danger-bg);color:var(--danger);font-size:10.5px;font-weight:700;
-  border-radius:999px;padding:2px 7px;margin-left:2px}
-.rf-time{font-size:11.5px;color:var(--muted-c);margin-left:auto;white-space:nowrap}
-.rf-txt{font-size:13px;line-height:1.55;color:var(--fg);margin:0 0 8px;word-break:keep-all}
-.rf-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+  border-radius:999px;padding:2px 7px;margin-left:2px;flex:none}
+.rf-time{font-size:11.5px;color:var(--muted-c);margin-left:auto;white-space:nowrap;flex:none}
+.rf-txt{font-size:13px;line-height:1.55;color:var(--fg);margin:0 0 8px;word-break:keep-all;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rf-tags{display:flex;flex-wrap:wrap;gap:5px;height:24px;overflow:hidden}
 .rf-tag{font-size:11px;font-weight:600;background:var(--surface-c);color:var(--body-c);
-  border-radius:999px;padding:3px 9px;cursor:default}
+  border-radius:999px;padding:3px 9px;cursor:default;flex:none}
 .rf-like{display:inline-flex;align-items:center;gap:5px;border:none;background:none;
-  color:var(--muted-c);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 0}
+  color:var(--muted-c);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 0;margin-top:6px}
 .rf-like svg{width:15px;height:15px}
 .rf-like.on{color:var(--danger)}
 .rf-dots{display:flex;gap:4px;justify-content:center;margin-top:8px}
@@ -1210,12 +1210,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <div class="rf-catfilter rf-hidden" id="rfCatFilter">카테고리: <b id="rfCatFilterName"></b> <button id="rfCatFilterClear" type="button">✕</button></div>
     <div class="rf-feed" id="rfFeed"><p class="formhint">불러오는 중…</p></div>
     <div id="rfMoreWrap" style="margin-top:12px"><button class="btn-ghost" id="rfMoreBtn" type="button">더 많은 기관 보기 ›</button></div>
-  </div>
-
-  <div class="eyebrow"><h2>리뷰 기반 AI 인사이트</h2><p>거래처 리뷰가 쌓이면 영업에 참고할 만한 내용을 자동으로 요약합니다</p></div>
-  <div class="card" id="aiInsightCard">
-    <div id="aiInsightBody"><p class="formhint">불러오는 중…</p></div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn-ghost" id="aiInsightBtn" type="button">🔄 다시 생성</button><span class="formhint" id="aiInsightMsg"></span></div>
   </div>
 
   <div class="eyebrow"><h2>전체 규모</h2></div>
@@ -2077,48 +2071,6 @@ const top10=sortedT.slice(0,10).reduce((s,c)=>s+c.t,0);
 const top50=sortedT.slice(0,50).reduce((s,c)=>s+c.t,0);
 const loyal6=CL.filter(c=>c.ny>=6), loyal6rev=loyal6.reduce((s,c)=>s+c.t,0);
 
-/* ---------- 부서명 별칭표 (2026년 조직도, 2025-11-01 시행 기준) ----------
-   과거 데이터(c.dv, 사업부문 태그)에는 조직개편 전 옛 이름이 그대로 남아 있을 수 있어서,
-   "주목 부서"를 집계하기 직전에 현재 실제로 존재하는 부서명으로 바꿔준다.
-   2026-09-29 사용자가 확인해준 2건(일자리사업→일자리창출본부, 대학사업→AI미래교육본부)과
-   조직도, 그리고 과거 사업부문 태그 샘플을 근거로 만든 1차본 — 표에 없는 태그는 원문 그대로
-   보여준다. 프로젝트 문서 `부서명_매핑_2026조직도.md`에 근거와 한계를 기록해 두었다. */
-const DEPT_ALIAS={
-  '일자리사업':'일자리창출본부', '일자리사업본부':'일자리창출본부', '일자리':'일자리창출본부', '일자리창출':'일자리창출본부',
-  '대학사업':'AI미래교육본부', '대학사업본부':'AI미래교육본부', '대학':'AI미래교육본부',
-  '평생교육':'평생교육본부',
-  '경영자과정':'경영자교육센터', '경영자교육':'경영자교육센터',
-  '부산지역본부':'부산경남본부', '부산':'부산경남본부', '경남지역본부':'부산경남본부',
-  '중부지역본부':'중부본부', '중부':'중부본부',
-  '대구지역본부':'대구경북본부', '대구':'대구경북본부', '경북지역본부':'대구경북본부',
-  '광주지역본부':'광주전남전북본부', '전남지역본부':'광주전남전북본부', '전북지역본부':'광주전남전북본부', '제주지역본부':'광주전남전북본부',
-  '인재혁신':'인재혁신그룹', '조직개발':'인재혁신그룹', '조직문화':'인재혁신그룹'
-};
-function applyDeptAlias(name){
-  if(!name) return name;
-  const t=String(name).trim();
-  return DEPT_ALIAS[t] || t;
-}
-/* 카드에 표시할 "주목 부서"를 실제 거래 데이터에서 계산한다. 각 거래처의 사업부문 태그
-   (c.dv — 거래처 상세 화면에도 그대로 보여주는, 실제 프로젝트 수행 이력에서 집계된 실제
-   부서/부문명)를 건수 가중치로 합산하고, DEPT_ALIAS로 옛 이름을 현재 부서명으로 바꾼 뒤
-   가장 많이 담당해 온 부서를 고른다. */
-function topDeptLabel(clients, topN){
-  topN=topN||1;
-  const m={};
-  (clients||[]).forEach(c=>{
-    if(!c || !c.dv) return;
-    c.dv.forEach(pair=>{
-      const raw=pair && pair[0], n=(pair && pair[1]) || 1;
-      if(!raw) return;
-      const name=applyDeptAlias(raw);
-      m[name]=(m[name]||0)+n;
-    });
-  });
-  const arr=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,topN).map(x=>x[0]);
-  return arr.length ? arr.join(' · ') : '영업팀';
-}
-
 function groupSum(keyFn){ const m=new Map();
   PJ.forEach(p=>{ const k=keyFn(p); if(k==null) return; const o=m.get(k)||{rev:0,n:0}; o.rev+=p[4]; o.n++; m.set(k,o); });
   return Array.from(m,([k,v])=>({k,...v})).sort((a,b)=>b.rev-a.rev); }
@@ -2449,19 +2401,6 @@ function renderSummary(){
   const down=CL.filter(c=>c.st==='감소');
   const downPrev=down.reduce((s,c)=>s+c.p3,0), downNow=down.reduce((s,c)=>s+c.r3,0);
 
-  /* 카드별 "주목 부서" — 하드코딩 대신, 각 카드에 해당하는 거래처들의 실제 사업부문(c.dv)을
-     집계해서 가장 많이 담당해 온 부서를 보여준다(옛 조직명은 DEPT_ALIAS로 변환됨).
-     3번째(2025년 매출 감소) 카드는 특정 거래처 목록이 아니라 전사 추이 카드라, 실제로
-     2024→2025 매출이 줄어든 거래처들을 대리 목록으로 삼는다. */
-  const FACT_DEPT=[
-    topDeptLabel(sortedT.slice(0,10)),
-    topDeptLabel(loyal6),
-    topDeptLabel(CL.filter(c=>c.rv[5]>c.rv[6])),
-    topDeptLabel(CL.filter(c=>c.st==='재활성화 후보')),
-    topDeptLabel(down),
-    topDeptLabel(CL.filter(c=>c.st==='신규 진입'))
-  ];
-
   const top4Rev=sortedT.slice(0,4).map(c=>({label:c.n, value:won(c.t)}));
   const loyalSorted=loyal6.slice().sort((a,b)=>b.t-a.t);
   const top4Loyal=loyalSorted.slice(0,4).map(c=>({label:c.n, value:c.ny+'년째'}));
@@ -2621,7 +2560,6 @@ function renderSummary(){
     b.type='button';
     b.innerHTML='<span class="f-head">'+oiIcon(f[1],f[2],f[0],28)+'<span class="f-t">'+f[3]+'</span></span>'+
       f[4]+'<span class="f-d">'+f[5]+'</span>'+
-      '<span class="f-dept">👀 <b>'+esc(FACT_DEPT[i])+'</b> 주목이 필요해요</span>'+
       '<span class="f-more">'+esc(f[6])+' ›</span>';
     b.addEventListener('click',f[7]); fg.appendChild(b);
   });
@@ -2758,15 +2696,6 @@ function renderFutureInsights(){
 
   const fmtDay=d=> d===0 ? '오늘 마감' : ('D-'+d);
 
-  const FUTURE_DEPT=[
-    topDeptLabel(reactSignalFull),
-    topDeptLabel(prepDedupFull.map(r=>r.c)),
-    topDeptLabel(newFieldDedupFull.map(r=>r.c)),
-    topDeptLabel(crossSellFull),
-    topDeptLabel(recurringRows.map(r=>r.c)),
-    topDeptLabel(multiFull.map(r=>r.c))
-  ];
-
   const futureFacts=[
     [OI_ICON_REACT, FC_BLUE, FC_BLUE_FG, '영업 기회 신호',
       reactSignal.length ? miniTiles(reactSignal.map(c=>({label:c.n, value:(openByClient[c.id]||[]).length+'건 공고'}))) : '',
@@ -2823,7 +2752,6 @@ function renderFutureInsights(){
     b.type='button';
     b.innerHTML='<span class="f-head">'+oiIcon(f[1],f[2],f[0],28)+'<span class="f-t">'+f[3]+'</span></span>'+
       f[4]+'<span class="f-d">'+f[5]+'</span>'+
-      '<span class="f-dept">👀 <b>'+esc(FUTURE_DEPT[i])+'</b> 주목이 필요해요</span>'+
       '<span class="f-more">'+esc(f[6])+' ›</span>';
     b.addEventListener('click',f[7]);
     fg.appendChild(b);
@@ -4721,27 +4649,6 @@ function formatInsightHtml(text){
   }
   return html;
 }
-async function renderAiInsight(){
-  const body=$('#aiInsightBody'); if(!body) return;
-  try{
-    const [rows, allTags]=await Promise.all([
-      sbSelect('insights?company_name=eq.__ALL__&select=insight_text,review_count,updated_at&limit=1'),
-      sbSelect('reviews?select=tags').catch(()=>[])
-    ]);
-    const row=rows&&rows[0];
-    const tagsHtml=tagFreqHTML(allTags, 8);
-    if(row&&row.insight_text){
-      body.innerHTML=tagsHtml+formatInsightHtml(row.insight_text)+
-        '<p class="formhint" style="margin-top:10px">리뷰 '+cnt(row.review_count||0)+'건 기준 · '+esc(fmtTs(row.updated_at))+' 생성</p>';
-    } else if(tagsHtml){
-      body.innerHTML=tagsHtml+'<p class="formhint">아직 생성된 인사이트가 없습니다. 리뷰가 쌓인 뒤 아래 "다시 생성"을 눌러보세요.</p>';
-    } else {
-      body.innerHTML='<p class="formhint">아직 생성된 인사이트가 없습니다. 리뷰가 쌓인 뒤 아래 "다시 생성"을 눌러보세요.</p>';
-    }
-  }catch(e){
-    body.innerHTML='<p class="formhint">인사이트를 불러오지 못했습니다 — <b>'+esc(e&&e.message||String(e))+'</b></p>';
-  }
-}
 async function renderClientInsight(c){
   const body=$('#clientInsightBody'); if(!body) return;
   try{
@@ -4791,30 +4698,6 @@ async function renderClientNews(c){
     body.innerHTML='<p class="formhint">뉴스를 불러오지 못했습니다 — <b>'+esc(e&&e.message||String(e))+'</b></p>';
   }
 }
-function initAiInsight(){
-  renderAiInsight();
-  const btn=$('#aiInsightBtn'); if(!btn) return;
-  btn.addEventListener('click', async ()=>{
-    const msg=$('#aiInsightMsg');
-    btn.disabled=true; if(msg) msg.textContent='생성 중… (리뷰가 많으면 몇 초 걸릴 수 있어요)';
-    try{
-      const r=await fetch(SUPABASE_FN_URL,{method:'POST',headers:sbHeaders(),body:JSON.stringify({})});
-      const raw=await r.text();
-      let j={}; try{ j=JSON.parse(raw); }catch(_){ }
-      if(!r.ok) throw new Error('HTTP '+r.status+' '+(j.error||raw.slice(0,300)));
-      if(j.error) throw new Error(j.error);
-      if(msg){
-        if(j.skipped==='no_reviews') msg.textContent='아직 리뷰가 없습니다.';
-        else if(j.skipped==='unchanged') msg.textContent='새로 등록된 리뷰가 없어 다시 생성하지 않았습니다.';
-        else msg.textContent='새로 생성했습니다.';
-      }
-      await renderAiInsight();
-    }catch(e){
-      if(msg) msg.textContent='생성 실패: '+(e&&e.message||String(e));
-    }finally{ btn.disabled=false; }
-  });
-}
-
 /* ---------- 거래처 리뷰 피드 (요약 인사이트 탭 — 댓글 피드 스타일) ----------
    2026-09-28: "리뷰 기반 AI 인사이트"(insights.__ALL__ 텍스트 한 덩어리)가 너무 길고
    안 읽힌다는 피드백으로, 네이버/인스타 댓글처럼 거래처별 리뷰 하나씩을 카드로 보여주고
@@ -5833,7 +5716,6 @@ drawInst(true);
 initAsk();
 initDB();
 initReviews();
-initAiInsight();
 initHomeReviewFeed();
 initChat();
 syncToTop();
