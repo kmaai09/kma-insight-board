@@ -1093,8 +1093,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 .rf-cname{font-weight:700;font-size:14px;cursor:pointer}
 .rf-cname:hover{color:var(--primary)}
 .rf-ccount{font-size:12px;color:var(--muted-c);white-space:nowrap}
-.rf-slot{min-height:150px;position:relative;padding:0 16px}
-.rf-cmt{position:absolute;left:16px;right:16px;top:0;padding-top:4px;opacity:1;transition:opacity .25s ease}
+.rf-slot{min-height:150px;position:relative;padding:0 28px}
+.rf-cmt{position:absolute;left:28px;right:28px;top:0;padding-top:4px;opacity:1;transition:opacity .25s ease}
 .rf-cmt.hide{opacity:0;pointer-events:none}
 .rf-who{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .rf-avatar{width:28px;height:28px;border-radius:50%;flex:none}
@@ -1114,13 +1114,13 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
 .rf-dots{display:flex;gap:4px;justify-content:center;margin-top:8px}
 .rf-dots i{width:5px;height:5px;border-radius:50%;background:var(--border-c);display:inline-block}
 .rf-dots i.on{background:var(--primary)}
-.rf-nav{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;
+.rf-nav{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;
   border:1px solid var(--border-c);background:var(--canvas);color:var(--body-c);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;opacity:.55;z-index:5;font-size:12px;padding:0;
-  line-height:1}
+  display:flex;align-items:center;justify-content:center;opacity:.8;z-index:5;font-size:13px;padding:0;
+  line-height:1;box-shadow:0 1px 3px rgba(20,24,32,.12)}
 .rf-card:hover .rf-nav{opacity:1}
-.rf-nav.prev{left:-2px}
-.rf-nav.next{right:-2px}
+.rf-nav.prev{left:2px}
+.rf-nav.next{right:2px}
 .rf-empty{padding:30px 0;text-align:center;color:var(--muted-c);font-size:13px}
 </style>
 <!-- ==================== 로그인 ==================== -->
@@ -3691,7 +3691,7 @@ function openClient(id, wantReviewForm){
         '<span>최근 '+ago(x.mo)+'</span></div>'+
         (s.why.length?'<div class="pm" style="margin-top:4px">'+s.why.map(w=>'<span class="tag">'+esc(w)+'</span>').join('')+'</div>':'')+
         '</div><div class="pv">'+won(x.t)+'</div></div>'; }).join('')+'</div></div>':'')+
-    '<div class="card" id="clientNewsCard"><h3>최근 뉴스</h3>'+
+    '<div class="card" id="clientNewsCard"><h3>거래처 관련 최근 뉴스</h3>'+
       '<div id="clientNewsBody"><p class="formhint">불러오는 중…</p></div></div>'+
   '</div>';
   const dr=$('#drawer'); dr.innerHTML=html; dr.classList.add('on'); $('#scrim').classList.add('on');
@@ -4780,9 +4780,8 @@ async function renderClientNews(c){
     body.innerHTML=note+'<div class="plist">'+items.map(it=>
       '<a class="pitem click" href="'+esc(it.link)+'" target="_blank" rel="noopener" style="display:flex;text-decoration:none;color:inherit">'+
         '<div style="min-width:0"><div class="pn">'+esc(it.title)+'</div>'+
-        '<div class="pm" style="white-space:normal">'+esc(it.description)+'</div>'+
-        '<div class="pm" style="margin-top:4px">'+esc(fmtTs(it.pubDate)||'')+
-          (it.reason?' · <span class="tag">'+esc(it.reason)+'</span>':'')+'</div></div>'+
+        (it.reason?'<div class="pm" style="margin:3px 0 5px"><span class="tag hi">'+esc(it.reason)+'</span></div>':'')+
+        '<div class="pm" style="white-space:normal">'+esc(it.description)+'</div></div>'+
       '</a>'
     ).join('')+'</div>';
   }catch(e){
@@ -5003,7 +5002,7 @@ function rfStartRotation(){
       const slots=card.querySelectorAll('.rf-cmt'); if(slots.length<2) return;
       rfShowIndex(card, rfCurIndex(card)+1);
     });
-  }, 4500);
+  }, 8000);
 }
 function initHomeReviewFeed(){
   rfWireSortbar();
