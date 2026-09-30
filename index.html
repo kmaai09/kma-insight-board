@@ -208,12 +208,6 @@ main{flex:1;min-width:0;max-width:1368px;margin:0;padding:0 28px 96px}
 .up{color:var(--primary);font-weight:600}
 .dn{color:var(--danger);font-weight:600}
 
-.guide{display:grid;gap:2px}
-.guide button{background:none;border:0;border-radius:var(--r-ctl);text-align:left;padding:12px;display:grid;gap:2px}
-.guide button:hover{background:var(--surface-c)}
-.guide .g-t{font-size:15px;font-weight:600;color:var(--fg)}
-.guide .g-d{font-size:13px;line-height:20px;color:var(--muted-c)}
-
 /* ---------- fact 카드 안 미니 그래프 ---------- */
 .mini-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;background:var(--surface-c)}
 .mini-stack i{display:block;min-width:2px}
@@ -1154,10 +1148,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
     <p id="login-err" role="alert"></p>
     <p id="js-check" class="login-err-hard">이 화면에서 자바스크립트가 실행되지 않았습니다.
       파일을 내려받아 브라우저에서 직접 열어 주세요.</p>
-    <p class="login-hint">
-      사내 공용 계정 — 아이디 <b>kma</b> · 비밀번호 <b>kma2026</b><br>
-      <button type="button" class="linkq" id="lg-demo">공용 계정으로 들어가기</button>
-    </p>
   </form>
 </div>
 
@@ -1262,9 +1252,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
       <div class="blist" id="sumField"></div>
     </div>
   </div>
-
-  <div class="eyebrow"><h2>읽는 순서</h2></div>
-  <div class="card"><div class="guide" id="sumGuide"></div></div>
 </section>
 
 <!-- ==================== 전사 현황 ==================== -->
@@ -1879,8 +1866,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
   });
   $('lg-show').addEventListener('change', function(ev){
     $('lg-pw').type = ev.target.checked ? 'text' : 'password'; });
-  $('lg-demo').addEventListener('click', function(){
-    $('lg-id').value='kma'; $('lg-pw').value='kma2026'; tryLogin(); });
   document.addEventListener('click', function(ev){
     if (ev.target && ev.target.id === 'signout') signOut(); });
   try{
@@ -2693,23 +2678,6 @@ function renderSummary(){
     click:()=>goClient({field:f.k})
   })));
 
-  /* 처음 쓰는 사람을 위한 "어디부터 볼까" 안내 — "데이터 기준"은 관리자 전용 탭이라
-     관리자로 로그인했을 때만 목록에 넣는다(일반 계정에게 못 들어가는 링크를 보여주지 않기 위해). */
-  const guide=[
-    ['전사 현황','규모와 추세, 어디에서 매출이 나오는지','p-over'],
-    ['거래처 찾기','조건으로 좁혀 한 거래처를 파악할 때','p-client'],
-    ['영업 기회','접촉할 곳을 고를 때','p-opp'],
-    ['강사 풀','이 분야 강사가 몇 명 있는지 볼 때','p-inst']
-  ];
-  if(isAdminAcct()) guide.push(['데이터 기준','숫자를 보고에 인용하기 전에','p-note']);
-  const gd=$('#sumGuide');
-  if(gd){
-    gd.innerHTML='';
-    guide.forEach(g=>{
-      const b=el('button',null,'<span class="g-t">'+g[0]+'</span><span class="g-d">'+g[1]+'</span>');
-      b.type='button'; b.addEventListener('click',()=>goTab(g[2])); gd.appendChild(b);
-    });
-  }
 }
 
 const FICON_NEWS='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M6 8h8M6 11h8M6 14h5"/></svg>';
@@ -2865,10 +2833,10 @@ function renderFutureInsights(){
   const FUTURE_DEPT=[
     topDeptLabel(reactSignalFull, 4),
     topDeptLabel(prepDedupFull.map(r=>r.c), 4),
+    topDeptLabel(multiFull.map(r=>r.c), 4),
     topDeptLabel(news.general.map(x=>x.c), 4),
     topDeptLabel(news.budget.map(x=>x.c), 4),
-    topDeptLabel(news.org.map(x=>x.c), 4),
-    topDeptLabel(multiFull.map(r=>r.c), 4)
+    topDeptLabel(news.org.map(x=>x.c), 4)
   ];
 
   const futureFacts=[
@@ -2887,6 +2855,14 @@ function renderFutureInsights(){
         : '지금은 준비 시간이 여유로운(4~21일) 신규 매칭 공고가 없어요.',
       '가장 급한 곳 보기',
       ()=>{ if(prepTop[0]) openClient(prepTop[0].c.id); }],
+
+    [FICON_LAYERS, FC_RED, FC_RED_FG, '동시 진행 중인 공고',
+      multiRows.length ? miniTiles(multiRows.map(r=>({id:r.c.id, label:r.c.n, value:r.n+'건 동시 진행'}))) : '',
+      multiFull.length
+        ? '이 거래처들은 지금 공고를 2건 이상 동시에 진행하고 있어요 — 종합 제안을 검토해보세요.'
+        : '지금은 공고를 동시에 2건 이상 진행 중인 거래처가 없어요.',
+      '가장 많은 곳 보기',
+      ()=>{ if(multiRows[0]) openClient(multiRows[0].c.id); }],
 
     [FICON_NEWS, FC_BLUE, FC_BLUE_FG, '최근 뉴스에 등장한 거래처',
       newsLoading ? '' : (news.general.length ? miniTiles(news.general.slice(0,4).map(x=>({id:x.c.id, label:x.c.n, value:x.n+'건 뉴스'}))) : ''),
@@ -2913,15 +2889,7 @@ function renderFutureInsights(){
           ? cnt(news.org.length)+'곳에서 신임 임원·조직개편 관련 뉴스가 있었어요 — 새 담당자 대응이 필요할 수 있어요.'
           : '지금은 조직개편·리더십 변화 관련 뉴스가 뜬 주요 거래처가 없어요.'),
       '가장 유력한 곳 보기',
-      ()=>{ if(news.org[0]) openClient(news.org[0].c.id); }],
-
-    [FICON_LAYERS, FC_RED, FC_RED_FG, '동시 진행 중인 공고',
-      multiRows.length ? miniTiles(multiRows.map(r=>({id:r.c.id, label:r.c.n, value:r.n+'건 동시 진행'}))) : '',
-      multiFull.length
-        ? '이 거래처들은 지금 공고를 2건 이상 동시에 진행하고 있어요 — 종합 제안을 검토해보세요.'
-        : '지금은 공고를 동시에 2건 이상 진행 중인 거래처가 없어요.',
-      '가장 많은 곳 보기',
-      ()=>{ if(multiRows[0]) openClient(multiRows[0].c.id); }]
+      ()=>{ if(news.org[0]) openClient(news.org[0].c.id); }]
   ];
 
   fg.innerHTML='';
