@@ -208,6 +208,12 @@ main{flex:1;min-width:0;max-width:1368px;margin:0;padding:0 28px 96px}
 .up{color:var(--primary);font-weight:600}
 .dn{color:var(--danger);font-weight:600}
 
+.guide{display:grid;gap:2px}
+.guide button{background:none;border:0;border-radius:var(--r-ctl);text-align:left;padding:12px;display:grid;gap:2px}
+.guide button:hover{background:var(--surface-c)}
+.guide .g-t{font-size:15px;font-weight:600;color:var(--fg)}
+.guide .g-d{font-size:13px;line-height:20px;color:var(--muted-c)}
+
 /* ---------- fact 카드 안 미니 그래프 ---------- */
 .mini-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;background:var(--surface-c)}
 .mini-stack i{display:block;min-width:2px}
@@ -1070,22 +1076,22 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
   border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 .rf-sortbtn.on{background:var(--fg);border-color:var(--fg);color:var(--canvas)}
 .rf-catwrap{position:relative;display:inline-block}
-.rf-catmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:20;display:none;flex-wrap:wrap;
-  gap:6px;background:var(--canvas);border:1px solid var(--border-c);border-radius:var(--r-ctl);
-  padding:8px;box-shadow:0 8px 24px rgba(20,24,32,.16);width:220px}
+.rf-catmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:20;display:none;flex-direction:column;
+  gap:4px;background:var(--canvas);border:1px solid var(--border-c);border-radius:var(--r-ctl);
+  padding:8px;box-shadow:0 8px 24px rgba(20,24,32,.16);width:200px}
 .rf-catwrap:hover .rf-catmenu, .rf-catmenu:hover{display:flex}
 .rf-catmenu button{border:none;background:var(--surface-c);color:var(--body-c);border-radius:8px;
-  padding:6px 8px;font-size:12.5px;font-weight:600;cursor:pointer;width:calc(50% - 3px);text-align:center}
+  padding:7px 10px;font-size:12.5px;font-weight:600;cursor:pointer;width:100%;text-align:left;white-space:nowrap}
 .rf-catmenu button:hover{background:var(--weak-bg);color:var(--weak-fg)}
 .rf-catmenu button.on{background:var(--fg);color:var(--canvas)}
 .rf-catfilter{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--body-c);margin:0 0 10px}
 .rf-catfilter button{border:none;background:var(--surface-c);border-radius:999px;width:20px;height:20px;
   cursor:pointer;color:var(--body-c);line-height:1}
-.rf-feed{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rf-feed{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media (max-width:900px){.rf-feed{grid-template-columns:1fr}}
 .rf-card{position:relative;border:1px solid var(--border-c);border-radius:var(--r-panel);
-  background:var(--canvas);padding:14px 16px 12px;overflow:hidden}
-.rf-chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;gap:8px}
+  background:var(--canvas);padding:16px 18px 14px;overflow:hidden}
+.rf-chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
 .rf-cname{font-weight:700;font-size:14px;cursor:pointer}
 .rf-cname:hover{color:var(--primary)}
 .rf-ccount{font-size:12px;color:var(--muted-c);white-space:nowrap}
@@ -1247,6 +1253,9 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border-c);
       <div class="blist" id="sumField"></div>
     </div>
   </div>
+
+  <div class="eyebrow"><h2>읽는 순서</h2></div>
+  <div class="card"><div class="guide" id="sumGuide"></div></div>
 </section>
 
 <!-- ==================== 전사 현황 ==================== -->
@@ -1953,6 +1962,23 @@ try{
 }
 const YEARS = D.meta.years, NY = YEARS.length;
 const CL = D.clients, PJ = D.projects, INS = D.instructors;
+/* 원본 데이터(Supabase clients.n / instructors.name)에 괄호가 안 닫힌 채로 잘려 들어간
+   값이 섞여 있다(예: "강덕리(2026 경기도", "홍제미나 (사용X", "유한회사랍코리아(LAPP KOREA LL") —
+   원본 스프레드시트에서 이름 칸에 행사명·회사 영문명·내부 메모가 같이 적혔다가 길이 제한으로
+   잘린 것으로 보인다. 원문을 고칠 수는 없으니, 화면에는 괄호가 안 닫힌 부분과 이름 끝에 붙은
+   의미 없는 숫자만 잘라내고 보여준다(괄호가 정상적으로 닫힌 "주언규(신사임당)"·"한국수력원자력(주)"
+   같은 정상 표기는 그대로 둔다). */
+function cleanEntityName(raw){
+  let n=String(raw||'').trim();
+  const open=(n.match(/\(/g)||[]).length, close=(n.match(/\)/g)||[]).length;
+  if(open!==close){
+    const idx=n.indexOf('(');
+    if(idx>0) n=n.slice(0,idx).trim();
+  }
+  n=n.replace(/\d{3,}$/,'').trim();
+  return n || String(raw||'').trim();
+}
+CL.forEach(c=>{ c.n=cleanEntityName(c.n); });
 /* 발주처/하청 수동 수정값 — 테이블이 아직 없거나 조회가 안 되면 빈 값으로 조용히 넘어간다 */
 let CLIENT_OVERRIDES = {};
 try{
@@ -2599,6 +2625,23 @@ function renderSummary(){
     click:()=>goClient({field:f.k})
   })));
 
+  /* 처음 쓰는 사람을 위한 "어디부터 볼까" 안내 — "데이터 기준"은 관리자 전용 탭이라
+     관리자로 로그인했을 때만 목록에 넣는다(일반 계정에게 못 들어가는 링크를 보여주지 않기 위해). */
+  const guide=[
+    ['전사 현황','규모와 추세, 어디에서 매출이 나오는지','p-over'],
+    ['거래처 찾기','조건으로 좁혀 한 거래처를 파악할 때','p-client'],
+    ['영업 기회','접촉할 곳을 고를 때','p-opp'],
+    ['강사 풀','이 분야 강사가 몇 명 있는지 볼 때','p-inst']
+  ];
+  if(isAdminAcct()) guide.push(['데이터 기준','숫자를 보고에 인용하기 전에','p-note']);
+  const gd=$('#sumGuide');
+  if(gd){
+    gd.innerHTML='';
+    guide.forEach(g=>{
+      const b=el('button',null,'<span class="g-t">'+g[0]+'</span><span class="g-d">'+g[1]+'</span>');
+      b.type='button'; b.addEventListener('click',()=>goTab(g[2])); gd.appendChild(b);
+    });
+  }
 }
 
 /* ==================== 신규 인사이트 (나라장터 신규 공고 + 실적 패턴 기반) ====================
@@ -3946,12 +3989,14 @@ function renderOpp(){
       '해당 거래처 누적 매출 배분 <b>'+won(x.rev)+'원</b>'
   }));
   const reactExtraHTML=
-    '<div class="card"><h3>재활성화 후보 마지막 거래일</h3>'+
+    '<div class="card">'+
+      '<h3 style="margin-bottom:14px">재활성화 후보 마지막 거래일</h3>'+
       '<div class="donutwrap"><svg class="donut" id="reactGapDonut" viewBox="0 0 240 240" role="img" aria-label="재활성화 후보 마지막 거래일 분포"></svg>'+
-      '<div class="dlegend" id="reactGapLegend"></div></div></div>'+
-    '<div class="card"><h3>재활성화 후보 주요 거래 분야</h3>'+
+      '<div class="dlegend" id="reactGapLegend"></div></div>'+
+      '<h3 style="margin:24px 0 14px">재활성화 후보 주요 거래 분야</h3>'+
       '<div class="donutwrap"><svg class="donut" id="reactFieldDonut" viewBox="0 0 240 240" role="img" aria-label="재활성화 후보 주요 거래 분야 분포"></svg>'+
-      '<div class="dlegend" id="reactFieldLegend"></div></div></div>';
+      '<div class="dlegend" id="reactFieldLegend"></div></div>'+
+    '</div>';
 
   const recur=recurringClients(oppCL);
   const pclGroups=[
@@ -3992,7 +4037,7 @@ function renderOpp(){
 const IMETA=D.meta.inst||{};
 const SRC_LAB={0:'마스터',1:'플랫폼',2:'마스터+플랫폼 통합',3:'이름 중복 병합'};
 const IX=INS.map((r,i)=>({
-  i:i, n:r[0], maj:r[1]||'기타·미분류', min:r[2]||'기타·미분류',
+  i:i, n:cleanEntityName(r[0]), maj:r[1]||'기타·미분류', min:r[2]||'기타·미분류',
   fl:String(r[3]||'').split(',').map(s=>s.trim()).filter(Boolean),
   t:r[4]||'', k:r[5]||'', ex:r[6]||'', co:r[7]||'', po:r[8]||'', src:r[9], car:r[10]||'',
   up:r[11]||'', why:r[12]||'', img:(r[13]||'').trim(),
@@ -4436,6 +4481,7 @@ function initChat(){
 let DB=null, DBREADY=false, opUnsub=null;
 let OPCOUNT={}, opFlash='';
 let opFormOpen=false;
+let opActionId=null, opActionMode=null, opActionMsg='';
 let G2BALL=[], G2BCOUNT={};
 let ASKALL=[], askBoxOpen=false;
 const TAGS=['의사결정 빠름','재구매 의향 있음','요구사항 많음','일정 촉박','정산·대금 지연','담당자 교체 잦음','유의 필요'];
@@ -4531,9 +4577,14 @@ async function sbUpdate(table,id,patch){
   return r.json();
 }
 async function sbDelete(table,id){
-  const r=await fetch(SUPABASE_URL+'/rest/v1/'+table+'?id=eq.'+id, {method:'DELETE', headers:sbHeaders()});
+  /* return=representation으로 삭제된 행을 그대로 돌려받는다 — RLS(행 수준 보안)에
+     delete 정책이 아예 없으면 Supabase는 에러 없이 "조건에 맞는 행이 0건"인 것처럼
+     조용히 0건 처리한 뒤 200/204를 돌려준다. HTTP 상태만 보면 성공한 것 같지만
+     실제로는 아무것도 안 지워진 것이라, 호출하는 쪽에서 배열 길이로 진짜 성공
+     여부를 판단해야 한다. */
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+table+'?id=eq.'+id, {method:'DELETE', headers:sbHeaders({Prefer:'return=representation'})});
   if(!r.ok){ const t=await r.text().catch(()=>''); throw new Error('HTTP '+r.status+' '+t.slice(0,300)); }
-  return true;
+  return r.json().catch(()=>[]);
 }
 async function loadInquiries(){
   try{
@@ -4713,8 +4764,8 @@ function rfSaveLiked(){ try{ localStorage.setItem('kmaLikedReviews', JSON.string
 function hashStr(s){ s=String(s||''); let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
 function rfMaskName(n){ n=String(n||'').trim(); if(!n) return '익명'; return n[0]+'〇'.repeat(Math.max(1,n.length-1)); }
 const RF_AVATAR_COLORS=['#3182f6','#2fb380','#f59f00','#a855f7','#ef4444','#0ea5e9','#14b8a6','#f472b6'];
-function rfAvatarSVG(seed){
-  const color=RF_AVATAR_COLORS[hashStr(seed)%RF_AVATAR_COLORS.length];
+function rfAvatarSVG(seed, anon){
+  const color=anon ? '#9aa4b2' : RF_AVATAR_COLORS[hashStr(seed)%RF_AVATAR_COLORS.length];
   return '<svg viewBox="0 0 40 40" class="rf-avatar" aria-hidden="true">'+
     '<circle cx="20" cy="20" r="20" fill="'+color+'" opacity=".18"/>'+
     '<circle cx="20" cy="16" r="7" fill="'+color+'"/>'+
@@ -4730,7 +4781,7 @@ function rfFmtAgo(iso){
   return fmtTs(iso).slice(0,10);
 }
 function rfIsNew(iso){ const t=new Date(iso).getTime(); return !isNaN(t) && (Date.now()-t) < 24*3600*1000; }
-function rfCategoryOf(tag){ return String(tag||'').split(/[·\s]/)[0]; }
+function rfCategoryOf(tag){ return String(tag||'').trim(); }
 function rfLikes(o){ return (o.like_count||0) + (o._likeDelta||0); }
 
 async function loadHomeReviewFeed(){
@@ -4796,7 +4847,7 @@ function rfCardHTML(c){
     const name=o.anon? '익명' : rfMaskName(o.author_name);
     const liked=rfLiked.has(o.id), likeN=rfLikes(o);
     return '<div class="rf-cmt'+(i===0?'':' hide')+'" data-idx="'+i+'">'+
-      '<div class="rf-who">'+(o.anon?'<span class="rf-avatar" style="display:inline-block;background:var(--surface-c)"></span>':rfAvatarSVG(o.author_name||o.id))+
+      '<div class="rf-who">'+rfAvatarSVG(o.anon?o.id:(o.author_name||o.id), o.anon)+
       '<b>'+esc(name)+'</b>'+(o.dept&&!o.anon?'<span class="dept">'+esc(o.dept)+'</span>':'')+
       (rfIsNew(o.created_at)?'<span class="rf-new">NEW</span>':'')+
       '<span class="rf-time">'+esc(rfFmtAgo(o.created_at))+'</span></div>'+
@@ -4932,8 +4983,9 @@ async function loadG2bNotices(){
   }catch(e){ try{ console.warn('[g2b] load failed', e); }catch(_){} }
 }
 async function mountOpinions(c){
-  opFlash=''; opFormOpen=false;
+  opFlash=''; opFormOpen=false; opActionId=null; opActionMode=null; opActionMsg='';
   REVIEWSREADY=false; renderOpBox();
+  wireOpList();
   await loadCompanyReviews(c.n);
   if(curClient && curClient.n===c.n) renderOpBox();
 }
@@ -4942,15 +4994,125 @@ let opTagState = new Set();
 function opListHTML(){
   const mine=REVIEWS;
   if(!mine.length) return '<p class="formhint" style="margin:14px 0 0">아직 등록된 리뷰가 없습니다. 첫 리뷰를 남겨보세요.</p>';
-  return '<div class="oplist">'+mine.map(o=>
-    '<div class="opitem"><div class="op-h"><b'+(o.anon?' class="anon"':'')+'>'+
+  const mySabun=(who().sabun||'').trim();
+  return '<div class="oplist">'+mine.map(o=>{
+    const oid=String(o.id);
+    const isMine=!!(mySabun && o.author_id && String(o.author_id).trim()===mySabun);
+
+    /* 삭제 확인 중인 리뷰는 목록 대신 확인 문구 + 삭제/취소 버튼만 보여준다 */
+    if(isMine && opActionId===oid && opActionMode==='delete'){
+      return '<div class="opitem" data-id="'+esc(oid)+'">'+
+        '<p class="formhint" style="margin:0 0 8px"><b style="color:var(--danger)">이 리뷰를 삭제할까요? 되돌릴 수 없습니다.</b></p>'+
+        (opActionMsg?'<p class="formhint">'+opActionMsg+'</p>':'')+
+        '<div style="display:flex;gap:8px;align-items:center">'+
+          '<button class="btn-sm" data-review-del-confirm="'+esc(oid)+'" style="background:var(--danger)">삭제</button>'+
+          '<button class="linkbtn" data-review-del-cancel type="button">취소</button>'+
+        '</div></div>';
+    }
+    /* 수정 중인 리뷰는 태그/내용만 다시 편집한다 — 사번·이름·부서·익명 여부는 등록 당시 그대로 둔다 */
+    if(isMine && opActionId===oid && opActionMode==='edit'){
+      const curTags=o.tags||[];
+      return '<div class="opitem" data-id="'+esc(oid)+'">'+
+        '<div class="chips" data-edit-tags>'+TAGS.map(t=>'<button class="chip" type="button" aria-pressed="'+
+          (curTags.includes(t)?'true':'false')+'" data-t="'+esc(t)+'">'+esc(t)+'</button>').join('')+'</div>'+
+        '<textarea class="inp" data-edit-text maxlength="1000">'+esc(o.content||'')+'</textarea>'+
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">'+
+          '<button class="btn-sm" data-review-edit-save="'+esc(oid)+'">저장</button>'+
+          '<button class="linkbtn" data-review-edit-cancel type="button">취소</button>'+
+          '<span class="formhint" data-edit-msg>'+(opActionMsg||'')+'</span>'+
+        '</div></div>';
+    }
+    return '<div class="opitem" data-id="'+esc(oid)+'"><div class="op-h"><b'+(o.anon?' class="anon"':'')+'>'+
     esc(o.anon?'익명':(o.author_name||'익명'))+'</b>'+
     (!o.anon&&o.dept?'<span>'+esc(o.dept)+'</span>':'')+'<span>'+esc(fmtTs(o.created_at))+'</span>'+
+    (isMine?'<span class="spacer"></span>'+
+      '<button class="linkbtn" data-review-edit="'+esc(oid)+'" type="button">수정</button>'+
+      '<button class="linkbtn" data-review-del="'+esc(oid)+'" type="button">삭제</button>':'')+
     '</div>'+
     (o.content?'<p class="op-b">'+esc(o.content)+'</p>':'')+
     ((o.tags&&o.tags.length)?'<div class="op-t">'+o.tags.map(t=>'<span class="tag'+
       (/유의|지연/.test(t)?' wn':'')+'">'+esc(t)+'</span>').join('')+'</div>':'')+
-    '</div>').join('')+'</div>';
+    '</div>';
+  }).join('')+'</div>';
+}
+/* opListHTML()이 그려낸 목록(수정/삭제 버튼 포함) 안의 클릭을 위임 처리한다.
+   #opBox 자체에 한 번만 걸어두면, opFormOpen 여부와 무관하게 목록이 다시 그려질 때마다
+   매번 새로 바인딩할 필요가 없다(위임 리스너는 #opBox가 살아있는 한 계속 유효). */
+function wireOpList(){
+  const box=$('#opBox'); if(!box || box.dataset.opWired) return;
+  /* #opBox는 거래처 상세를 열 때마다(openClient) 통째로 새로 그려지는 DOM이라, 매번 새 엘리먼트다.
+     엘리먼트 자체에 표시를 남겨 "이 엘리먼트에 이미 위임 리스너를 걸었는지"를 판단한다 —
+     모듈 전역 플래그를 쓰면 두 번째 거래처부터는 새 #opBox에 리스너가 안 걸리는 문제가 생긴다. */
+  box.dataset.opWired='1';
+  box.addEventListener('click', async e=>{
+    const editBtn=e.target.closest('[data-review-edit]');
+    if(editBtn){ opActionId=editBtn.dataset.reviewEdit; opActionMode='edit'; opActionMsg=''; renderOpBox(); return; }
+    const delBtn=e.target.closest('[data-review-del]');
+    if(delBtn){ opActionId=delBtn.dataset.reviewDel; opActionMode='delete'; opActionMsg=''; renderOpBox(); return; }
+    const cancelEdit=e.target.closest('[data-review-edit-cancel]');
+    if(cancelEdit){ opActionId=null; opActionMode=null; renderOpBox(); return; }
+    const cancelDel=e.target.closest('[data-review-del-cancel]');
+    if(cancelDel){ opActionId=null; opActionMode=null; renderOpBox(); return; }
+    const tagBtn=e.target.closest('[data-edit-tags] .chip');
+    if(tagBtn){
+      const on=tagBtn.getAttribute('aria-pressed')==='true';
+      tagBtn.setAttribute('aria-pressed', on?'false':'true');
+      return;
+    }
+    const saveBtn=e.target.closest('[data-review-edit-save]');
+    if(saveBtn){
+      const id=saveBtn.dataset.reviewEditSave;
+      const item=saveBtn.closest('.opitem');
+      const text=item.querySelector('[data-edit-text]').value.trim();
+      const tags=Array.from(item.querySelectorAll('[data-edit-tags] .chip[aria-pressed="true"]')).map(b=>b.dataset.t);
+      const msgEl=item.querySelector('[data-edit-msg]');
+      if(!text && !tags.length){ if(msgEl) msgEl.innerHTML='<b style="color:var(--danger)">내용이나 태그 중 하나는 남겨주세요.</b>'; return; }
+      saveBtn.disabled=true; if(msgEl) msgEl.textContent='저장 중…';
+      try{
+        const changed=await sbUpdate('reviews', id, {content:text, tags:tags});
+        if(!changed || !changed.length){
+          /* HTTP는 성공(200/204)인데 바뀐 행이 0건 — RLS에 update 정책이 없어 조용히
+             막힌 경우다. 서버는 에러를 던지지 않으므로 여기서 직접 판별해서 알려준다. */
+          throw new Error('RLS_NOOP');
+        }
+        opActionId=null; opActionMode=null;
+        await loadCompanyReviews(curClient.n);
+        if(typeof loadHomeReviewFeed==='function') loadHomeReviewFeed();
+        renderOpBox();
+      }catch(err){
+        saveBtn.disabled=false;
+        opActionMsg = (err && err.message==='RLS_NOOP')
+          ? '<b style="color:var(--danger)">수정 권한이 없습니다.</b> 데이터베이스에 리뷰 수정을 허용하는 설정이 안 돼 있어 저장되지 않았습니다 — 관리자에게 문의해 주세요.'
+          : '<b style="color:var(--danger)">저장에 실패했습니다. 잠시 후 다시 시도해 주세요.</b>';
+        if(msgEl) msgEl.innerHTML=opActionMsg;
+      }
+      return;
+    }
+    const confirmDel=e.target.closest('[data-review-del-confirm]');
+    if(confirmDel){
+      const id=confirmDel.dataset.reviewDelConfirm;
+      confirmDel.disabled=true;
+      try{
+        const removed=await sbDelete('reviews', id);
+        if(!removed || !removed.length){
+          /* 위와 같은 이유 — delete 정책이 아예 없으면 0건 삭제로 조용히 "성공" 처리된다. */
+          throw new Error('RLS_NOOP');
+        }
+        opActionId=null; opActionMode=null;
+        await loadCompanyReviews(curClient.n);
+        refreshReviewCounts();
+        if(typeof loadHomeReviewFeed==='function') loadHomeReviewFeed();
+        renderOpBox();
+      }catch(err){
+        confirmDel.disabled=false;
+        opActionMsg = (err && err.message==='RLS_NOOP')
+          ? '<b style="color:var(--danger)">삭제 권한이 없습니다.</b> 이 리뷰 테이블은 삭제가 막혀 있는 상태입니다(관리자만 Supabase 대시보드에서 지울 수 있음) — 관리자에게 문의해 주세요.'
+          : '<b style="color:var(--danger)">삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.</b>';
+        renderOpBox();
+      }
+      return;
+    }
+  });
 }
 
 /** 전체(폼 + 목록) — 거래처를 새로 열었을 때만 */
